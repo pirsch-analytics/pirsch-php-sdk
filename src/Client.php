@@ -1,5 +1,7 @@
 <?php
-class PirschClient {
+namespace Pirsch;
+
+class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
 	const AUTHENTICATION_ENDPOINT = '/api/v1/token';
 	const HIT_ENDPOINT = '/api/v1/hit';
@@ -51,7 +53,7 @@ class PirschClient {
 				$this->refreshToken();
 				return $this->hit(false);
 			} else {
-				throw new Exception('Error sending hit: '.$responseHeader);
+				throw new \Exception('Error sending hit: '.$responseHeader);
 			}
 		}
 
@@ -75,7 +77,7 @@ class PirschClient {
 		$result = @file_get_contents($this->baseURL.self::AUTHENTICATION_ENDPOINT, false, $context);
 		
 		if($result === FALSE) {
-			throw new Exception('Error refreshing token: '.$http_response_header[0]);
+			throw new \Exception('Error refreshing token: '.$http_response_header[0]);
 		}
 
 		$resp = json_decode($result);
