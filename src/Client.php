@@ -100,7 +100,7 @@ class Client {
 	}
 
 	private function getRequestURL() {
-		return 'http'.(isset($_SERVER['HTTPS']) ? 's' : '').'://'.$_SERVER['HTTP_HOST'].(str_ends_with($_SERVER['HTTP_HOST'], '/') ? '' : '/').$_SERVER['REQUEST_URI'];
+		return 'http'.(isset($_SERVER['HTTPS']) ? 's' : '').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 	}
 
 	private function getReferrer() {
