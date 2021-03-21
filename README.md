@@ -6,7 +6,7 @@ This is the official PHP client SDK for Pirsch. For details, please check out ou
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md);
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
