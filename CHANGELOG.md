@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+* added missing DNT (do not track) header
+
 ## 1.1.1
 
 * fixed request URI slashes

@@ -24,6 +24,10 @@ class Client {
 	}
 
 	function hit($retry = true) {
+        if($this->getHeader("DNT") === '1') {
+            return;
+        }
+
 		$data = array(
 			'hostname' => $this->hostname,
 			'url' => $this->getRequestURL(),
