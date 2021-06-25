@@ -9,6 +9,8 @@ class Client {
 		'ref',
 		'referer',
 		'referrer',
+		'source',
+        'utm_source'
 	);
 
 	private $baseURL;

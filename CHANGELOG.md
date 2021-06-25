@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+
+* added `source` and `utm_source` to referrers
+
 ## 1.1.2
 
 * added missing DNT (do not track) header
