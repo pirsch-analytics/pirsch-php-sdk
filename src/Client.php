@@ -5,10 +5,34 @@ class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
 	const AUTHENTICATION_ENDPOINT = '/api/v1/token';
 	const HIT_ENDPOINT = '/api/v1/hit';
+	const DOMAIN_ENDPOINT = "/api/v1/domain";
+    const SESSION_DURATION_ENDPOINT = "/api/v1/statistics/duration/session";
+    const TIME_ON_PAGE_ENDPOINT = "/api/v1/statistics/duration/page";
+    const UTM_SOURCE_ENDPOINT = "/api/v1/statistics/utm/source";
+    const UTM_MEDIUM_ENDPOINT = "/api/v1/statistics/utm/medium";
+    const UTM_CAMPAIGN_ENDPOINT = "/api/v1/statistics/utm/campaign";
+    const UTM_CONTENT_ENDPOINT = "/api/v1/statistics/utm/content";
+    const UTM_TERM_ENDPOINT = "/api/v1/statistics/utm/term";
+    const VISITORS_ENDPOINT = "/api/v1/statistics/visitor";
+    const PAGES_ENDPOINT = "/api/v1/statistics/page";
+    const CONVERSION_GOALS_ENDPOINT = "/api/v1/statistics/goals";
+    const GROWTH_RATE_ENDPOINT = "/api/v1/statistics/growth";
+    const ACTIVE_VISITORS_ENDPOINT = "/api/v1/statistics/active";
+    const TIME_OF_DAY_ENDPOINT = "/api/v1/statistics/hours";
+    const LANGUAGE_ENDPOINT = "/api/v1/statistics/language";
+    const REFERRER_ENDPOINT = "/api/v1/statistics/referrer";
+    const OS_ENDPOINT = "/api/v1/statistics/os";
+    const BROWSER_ENDPOINT = "/api/v1/statistics/browser";
+    const COUNTRY_ENDPOINT = "/api/v1/statistics/country";
+    const PLATFORM_ENDPOINT = "/api/v1/statistics/platform";
+    const SCREEN_ENDPOINT = "/api/v1/statistics/screen";
+    const KEYWORDS_ENDPOINT = "/api/v1/statistics/keywords";
 	const REFERRER_QUERY_PARAMS = array(
 		'ref',
 		'referer',
 		'referrer',
+		'source',
+        'utm_source'
 	);
 
 	private $baseURL;
@@ -64,8 +88,155 @@ class Client {
 		return json_decode($result);
 	}
 
+	function domain($retry = true) {
+	    if($this->getAccessToken() === '' && $retry) {
+            $this->refreshToken();
+	    }
+
+	    $options = array(
+			'http' => array(
+				'method' => 'GET',
+				'header' => $this->getRequestHeader()
+			)
+		);
+		$context = stream_context_create($options);
+		$result = @file_get_contents($this->baseURL.self::DOMAIN_ENDPOINT, false, $context);
+
+		if($result === FALSE) {
+			$responseHeader = $http_response_header[0];
+
+			if($this->isUnauthorized($responseHeader) && $retry) {
+				$this->refreshToken();
+				return $this->domain(false);
+			} else {
+				throw new \Exception('Error getting domain: '.$responseHeader);
+			}
+		}
+
+		$domains = json_decode($result);
+
+		if(count($domains) !== 1) {
+		    throw new \Exception('Error reading domain from result');
+		}
+
+		return $domains[0];
+	}
+
+	function sessionDuration(Filter $filter) {
+        return $this->performGet(self::SESSION_DURATION_ENDPOINT, $filter);
+	}
+
+	function timeOnPage(Filter $filter) {
+        return $this->performGet(self::TIME_ON_PAGE_ENDPOINT, $filter);
+    }
+
+    function utmSource(Filter $filter) {
+        return $this->performGet(self::UTM_SOURCE_ENDPOINT, $filter);
+    }
+
+    function utmMedium(Filter $filter) {
+        return $this->performGet(self::UTM_MEDIUM_ENDPOINT, $filter);
+    }
+
+    function utmCampaign(Filter $filter) {
+        return $this->performGet(self::UTM_CAMPAIGN_ENDPOINT, $filter);
+    }
+
+    function utmContent(Filter $filter) {
+        return $this->performGet(self::UTM_CONTENT_ENDPOINT, $filter);
+    }
+
+    function utmTerm(Filter $filter) {
+        return $this->performGet(self::UTM_TERM_ENDPOINT, $filter);
+    }
+
+    function visitors(Filter $filter) {
+        return $this->performGet(self::VISITORS_ENDPOINT, $filter);
+    }
+
+    function pages(Filter $filter) {
+        return $this->performGet(self::PAGES_ENDPOINT, $filter);
+    }
+
+    function conversionGoals(Filter $filter) {
+        return $this->performGet(self::CONVERSION_GOALS_ENDPOINT, $filter);
+    }
+
+    function growth(Filter $filter) {
+        return $this->performGet(self::GROWTH_RATE_ENDPOINT, $filter);
+    }
+
+    function activeVisitors(Filter $filter) {
+        return $this->performGet(self::ACTIVE_VISITORS_ENDPOINT, $filter);
+    }
+
+    function timeOfDay(Filter $filter) {
+        return $this->performGet(self::TIME_OF_DAY_ENDPOINT, $filter);
+    }
+
+    function languages(Filter $filter) {
+        return $this->performGet(self::LANGUAGE_ENDPOINT, $filter);
+    }
+
+    function referrer(Filter $filter) {
+        return $this->performGet(self::REFERRER_ENDPOINT, $filter);
+    }
+
+    function os(Filter $filter) {
+        return $this->performGet(self::OS_ENDPOINT, $filter);
+    }
+
+    function browser(Filter $filter) {
+        return $this->performGet(self::BROWSER_ENDPOINT, $filter);
+    }
+
+    function country(Filter $filter) {
+        return $this->performGet(self::COUNTRY_ENDPOINT, $filter);
+    }
+
+    function platform(Filter $filter) {
+        return $this->performGet(self::PLATFORM_ENDPOINT, $filter);
+    }
+
+    function screen(Filter $filter) {
+        return $this->performGet(self::SCREEN_ENDPOINT, $filter);
+    }
+
+    function keywords(Filter $filter) {
+        return $this->performGet(self::KEYWORDS_ENDPOINT, $filter);
+    }
+
+    private function performGet($url, Filter $filter, $retry = true) {
+        if($this->getAccessToken() === '' && $retry) {
+            $this->refreshToken();
+        }
+
+        $query = http_build_query($filter);
+        $options = array(
+            'http' => array(
+                'method' => 'GET',
+                'header' => $this->getRequestHeader()
+            )
+        );
+        $context = stream_context_create($options);
+        $result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
+
+        if($result === FALSE) {
+            $responseHeader = $http_response_header[0];
+
+            if($this->isUnauthorized($responseHeader) && $retry) {
+                $this->refreshToken();
+                return $this->performGet($url, $filter, false);
+            } else {
+                throw new \Exception('Error getting result for '.$url.': '.$responseHeader);
+            }
+        }
+
+        return json_decode($result);
+    }
+
 	private function refreshToken() {
-		$data = array(
+	    $data = array(
 			'grant_type' => 'client_credentials',
 			'client_id' => $this->clientID,
 			'client_secret' => $this->clientSecret
@@ -89,14 +260,18 @@ class Client {
 	}
 
 	private function getRequestHeader() {
-		$token = '';
-
-		if(isset($_SESSION['pirsch_access_token'])) {
-			$token = $_SESSION['pirsch_access_token'];
-		}
-
-		return "Authorization: Bearer ".$token."\r\n".
+		return "Authorization: Bearer ".$this->getAccessToken()."\r\n".
 			"Content-Type: application/json\r\n";
+	}
+
+	private function getAccessToken() {
+	    $token = '';
+
+        if(isset($_SESSION['pirsch_access_token'])) {
+            $token = $_SESSION['pirsch_access_token'];
+        }
+
+        return $token;
 	}
 
 	private function isUnauthorized($header) {
