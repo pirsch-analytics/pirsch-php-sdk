@@ -6,19 +6,26 @@ error_reporting(E_ALL);
 session_start();
 session_destroy();
 
-require_once "src/Client.php";
-require_once "src/Filter.php";
+require_once 'src/Client.php';
+require_once 'src/Filter.php';
 
-$clientID = 'O8M06LMMjrxdX02foKceD7avBwLdFfnz';
-$clientSecret = 'BKw88hmG8CviHVhoxRF7WJMk9lJpe8KDwMJ8fgg0Eaep0KU6bXYhSjKHm7CjKHIe';
+$clientID = 'CqKGXpCJWsBY6ocSrU6qJlArWwXc5Yl0';
+$clientSecret = 'Sx9X1tY17a5yL4Tdw23Zjc8b9054NBJUjB53A3cBCom6lvn6IHxnZUNJo10ZmDMc';
 $client = new Pirsch\Client($clientID, $clientSecret, 'pirsch.io', 'http://localhost.com:9999');
 
-/*try {
+try {
 	$client->hit();
 	print '<p>Hit sent!</p>';
 } catch(Exception $e) {
-	print '<p>An error occurred while sending hit: </p>'.$e->getMessage();
-}*/
+	print '<p>An error occurred while sending the hit: </p>'.$e->getMessage();
+}
+
+try {
+	$client->event('PHP', 42, ['hello' => 'world']);
+	print '<p>Event sent!</p>';
+} catch(Exception $e) {
+	print '<p>An error occurred while sending the event: </p>'.$e->getMessage();
+}
 
 try {
     $domain = $client->domain();
@@ -27,8 +34,8 @@ try {
 
     $filter = new Pirsch\Filter();
     $filter->id = $domain->id;
-    $filter->from = "2021-06-19";
-    $filter->to = "2021-06-26";
+    $filter->from = date('Y-m-d', strtotime('-7 days'));
+    $filter->to = date('Y-m-d');
     var_dump($filter);
     echo '<br /><br />';
 
@@ -71,6 +78,20 @@ try {
     $conversionGoals = $client->conversionGoals($filter);
     var_dump($conversionGoals);
     echo '<br /><br />';
+
+    echo '<h2>Events</h2>';
+    $filter->event = 'PHP';
+    $events = $client->events($filter);
+    var_dump($events);
+    echo '<br /><br />';
+    
+    echo '<h2>Event Metadata</h2>';
+    $filter->event_meta_key = 'hello';
+    $metadata = $client->eventMetadata($filter);
+    var_dump($metadata);
+    echo '<br /><br />';
+    $filter->event = '';
+    $filter->event_meta_key = '';
 
     $growth = $client->growth($filter);
     var_dump($growth);

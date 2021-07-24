@@ -7,6 +7,8 @@ class Filter {
 	public $to;
 	public $path;
 	public $pattern;
+	public $event;
+	public $event_meta_key;
 	public $language;
 	public $country;
 	public $referrer;

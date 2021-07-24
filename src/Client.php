@@ -5,28 +5,31 @@ class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
 	const AUTHENTICATION_ENDPOINT = '/api/v1/token';
 	const HIT_ENDPOINT = '/api/v1/hit';
-	const DOMAIN_ENDPOINT = "/api/v1/domain";
-    const SESSION_DURATION_ENDPOINT = "/api/v1/statistics/duration/session";
-    const TIME_ON_PAGE_ENDPOINT = "/api/v1/statistics/duration/page";
-    const UTM_SOURCE_ENDPOINT = "/api/v1/statistics/utm/source";
-    const UTM_MEDIUM_ENDPOINT = "/api/v1/statistics/utm/medium";
-    const UTM_CAMPAIGN_ENDPOINT = "/api/v1/statistics/utm/campaign";
-    const UTM_CONTENT_ENDPOINT = "/api/v1/statistics/utm/content";
-    const UTM_TERM_ENDPOINT = "/api/v1/statistics/utm/term";
-    const VISITORS_ENDPOINT = "/api/v1/statistics/visitor";
-    const PAGES_ENDPOINT = "/api/v1/statistics/page";
-    const CONVERSION_GOALS_ENDPOINT = "/api/v1/statistics/goals";
-    const GROWTH_RATE_ENDPOINT = "/api/v1/statistics/growth";
-    const ACTIVE_VISITORS_ENDPOINT = "/api/v1/statistics/active";
-    const TIME_OF_DAY_ENDPOINT = "/api/v1/statistics/hours";
-    const LANGUAGE_ENDPOINT = "/api/v1/statistics/language";
-    const REFERRER_ENDPOINT = "/api/v1/statistics/referrer";
-    const OS_ENDPOINT = "/api/v1/statistics/os";
-    const BROWSER_ENDPOINT = "/api/v1/statistics/browser";
-    const COUNTRY_ENDPOINT = "/api/v1/statistics/country";
-    const PLATFORM_ENDPOINT = "/api/v1/statistics/platform";
-    const SCREEN_ENDPOINT = "/api/v1/statistics/screen";
-    const KEYWORDS_ENDPOINT = "/api/v1/statistics/keywords";
+	const EVENT_ENDPOINT = '/api/v1/event';
+	const DOMAIN_ENDPOINT = '/api/v1/domain';
+    const SESSION_DURATION_ENDPOINT = '/api/v1/statistics/duration/session';
+    const TIME_ON_PAGE_ENDPOINT = '/api/v1/statistics/duration/page';
+    const UTM_SOURCE_ENDPOINT = '/api/v1/statistics/utm/source';
+    const UTM_MEDIUM_ENDPOINT = '/api/v1/statistics/utm/medium';
+    const UTM_CAMPAIGN_ENDPOINT = '/api/v1/statistics/utm/campaign';
+    const UTM_CONTENT_ENDPOINT = '/api/v1/statistics/utm/content';
+    const UTM_TERM_ENDPOINT = '/api/v1/statistics/utm/term';
+    const VISITORS_ENDPOINT = '/api/v1/statistics/visitor';
+    const PAGES_ENDPOINT = '/api/v1/statistics/page';
+    const CONVERSION_GOALS_ENDPOINT = '/api/v1/statistics/goals';
+	const EVENTS_ENDPOINT = '/api/v1/statistics/events';
+	const EVENT_METADATA_ENDPOINT = '/api/v1/statistics/event/meta';
+    const GROWTH_RATE_ENDPOINT = '/api/v1/statistics/growth';
+    const ACTIVE_VISITORS_ENDPOINT = '/api/v1/statistics/active';
+    const TIME_OF_DAY_ENDPOINT = '/api/v1/statistics/hours';
+    const LANGUAGE_ENDPOINT = '/api/v1/statistics/language';
+    const REFERRER_ENDPOINT = '/api/v1/statistics/referrer';
+    const OS_ENDPOINT = '/api/v1/statistics/os';
+    const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
+    const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
+    const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
+    const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
+    const KEYWORDS_ENDPOINT = '/api/v1/statistics/keywords';
 	const REFERRER_QUERY_PARAMS = array(
 		'ref',
 		'referer',
@@ -48,7 +51,7 @@ class Client {
 	}
 
 	function hit($retry = true) {
-        if($this->getHeader("DNT") === '1') {
+        if($this->getHeader('DNT') === '1') {
             return;
         }
 
@@ -82,6 +85,50 @@ class Client {
 				return $this->hit(false);
 			} else {
 				throw new \Exception('Error sending hit: '.$responseHeader);
+			}
+		}
+
+		return json_decode($result);
+	}
+
+	function event($name, $duration = 0, $meta = NULL, $retry = true) {
+        if($this->getHeader('DNT') === '1') {
+            return;
+        }
+
+		$data = array(
+			'event_name' => $name,
+			'event_duration' => $duration,
+			'event_meta' => $meta,
+			'hostname' => $this->hostname,
+			'url' => $this->getRequestURL(),
+			'ip' => $this->getHeader('REMOTE_ADDR'),
+			'cf_connecting_ip' => $this->getHeader('HTTP_CF_CONNECTING_IP'),
+			'x_forwarded_for' => $this->getHeader('HTTP_X_FORWARDED_FOR'),
+			'forwarded' => $this->getHeader('HTTP_FORWARDED'),
+			'x_real_ip' => $this->getHeader('HTTP_X_REAL_IP'),
+			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
+			'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
+			'referrer' => $this->getReferrer()
+		);
+		$options = array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => $this->getRequestHeader(),
+				'content' => json_encode($data)
+			)
+		);
+		$context = stream_context_create($options);
+		$result = @file_get_contents($this->baseURL.self::EVENT_ENDPOINT, false, $context);
+		
+		if($result === FALSE) {
+			$responseHeader = $http_response_header[0];
+
+			if($this->isUnauthorized($responseHeader) && $retry) {
+				$this->refreshToken();
+				return $this->hit(false);
+			} else {
+				throw new \Exception('Error sending event: '.$responseHeader);
 			}
 		}
 
@@ -160,6 +207,14 @@ class Client {
 
     function conversionGoals(Filter $filter) {
         return $this->performGet(self::CONVERSION_GOALS_ENDPOINT, $filter);
+    }
+
+	function events(Filter $filter) {
+        return $this->performGet(self::EVENTS_ENDPOINT, $filter);
+    }
+
+	function eventMetadata(Filter $filter) {
+        return $this->performGet(self::EVENT_METADATA_ENDPOINT, $filter);
     }
 
     function growth(Filter $filter) {
@@ -260,8 +315,8 @@ class Client {
 	}
 
 	private function getRequestHeader() {
-		return "Authorization: Bearer ".$this->getAccessToken()."\r\n".
-			"Content-Type: application/json\r\n";
+		return 'Authorization: Bearer '.$this->getAccessToken()."\r\n". // These have to be double quotation marks!
+			'Content-Type: application/json\r\n';
 	}
 
 	private function getAccessToken() {
