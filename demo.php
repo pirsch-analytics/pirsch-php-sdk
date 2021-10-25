@@ -75,6 +75,14 @@ try {
     var_dump($pages);
     echo '<br /><br />';
 
+    $entryPages = $client->entryPages($filter);
+    var_dump($entryPages);
+    echo '<br /><br />';
+
+    $exitPages = $client->exitPages($filter);
+    var_dump($exitPages);
+    echo '<br /><br />';
+
     $conversionGoals = $client->conversionGoals($filter);
     var_dump($conversionGoals);
     echo '<br /><br />';
@@ -123,6 +131,10 @@ try {
 
     $country = $client->country($filter);
     var_dump($country);
+    echo '<br /><br />';
+
+    $city = $client->city($filter);
+    var_dump($city);
     echo '<br /><br />';
 
     $platform = $client->platform($filter);

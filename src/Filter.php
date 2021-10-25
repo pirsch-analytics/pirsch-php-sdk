@@ -7,11 +7,15 @@ class Filter {
 	public $to;
 	public $path;
 	public $pattern;
+	public $entry_path;
+	public $exit_path;
 	public $event;
 	public $event_meta_key;
 	public $language;
 	public $country;
+	public $city;
 	public $referrer;
+	public $referrer_name;
 	public $os;
 	public $browser;
 	public $platform;

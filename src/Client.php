@@ -6,6 +6,7 @@ class Client {
 	const AUTHENTICATION_ENDPOINT = '/api/v1/token';
 	const HIT_ENDPOINT = '/api/v1/hit';
 	const EVENT_ENDPOINT = '/api/v1/event';
+	const SESSION_ENDPOINT = '/api/v1/session';
 	const DOMAIN_ENDPOINT = '/api/v1/domain';
     const SESSION_DURATION_ENDPOINT = '/api/v1/statistics/duration/session';
     const TIME_ON_PAGE_ENDPOINT = '/api/v1/statistics/duration/page';
@@ -16,6 +17,8 @@ class Client {
     const UTM_TERM_ENDPOINT = '/api/v1/statistics/utm/term';
     const VISITORS_ENDPOINT = '/api/v1/statistics/visitor';
     const PAGES_ENDPOINT = '/api/v1/statistics/page';
+	const ENTRY_PAGES_ENDPOINT = '/api/v1/statistics/page/entry';
+	const EXIT_PAGES_ENDPOINT = '/api/v1/statistics/page/exit';
     const CONVERSION_GOALS_ENDPOINT = '/api/v1/statistics/goals';
 	const EVENTS_ENDPOINT = '/api/v1/statistics/events';
 	const EVENT_METADATA_ENDPOINT = '/api/v1/statistics/event/meta';
@@ -27,6 +30,7 @@ class Client {
     const OS_ENDPOINT = '/api/v1/statistics/os';
     const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
     const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
+	const CITY_ENDPOINT = '/api/v1/statistics/city';
     const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
     const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
     const KEYWORDS_ENDPOINT = '/api/v1/statistics/keywords';
@@ -135,6 +139,45 @@ class Client {
 		return json_decode($result);
 	}
 
+	function session($retry = true) {
+        if($this->getHeader('DNT') === '1') {
+            return;
+        }
+
+		$data = array(
+			'hostname' => $this->hostname,
+			'url' => $this->getRequestURL(),
+			'ip' => $this->getHeader('REMOTE_ADDR'),
+			'cf_connecting_ip' => $this->getHeader('HTTP_CF_CONNECTING_IP'),
+			'x_forwarded_for' => $this->getHeader('HTTP_X_FORWARDED_FOR'),
+			'forwarded' => $this->getHeader('HTTP_FORWARDED'),
+			'x_real_ip' => $this->getHeader('HTTP_X_REAL_IP'),
+			'user_agent' => $this->getHeader('HTTP_USER_AGENT')
+		);
+		$options = array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => $this->getRequestHeader(),
+				'content' => json_encode($data)
+			)
+		);
+		$context = stream_context_create($options);
+		$result = @file_get_contents($this->baseURL.self::SESSION_ENDPOINT, false, $context);
+		
+		if($result === FALSE) {
+			$responseHeader = $http_response_header[0];
+
+			if($this->isUnauthorized($responseHeader) && $retry) {
+				$this->refreshToken();
+				return $this->hit(false);
+			} else {
+				throw new \Exception('Error sending hit: '.$responseHeader);
+			}
+		}
+
+		return json_decode($result);
+	}
+
 	function domain($retry = true) {
 	    if($this->getAccessToken() === '' && $retry) {
             $this->refreshToken();
@@ -205,6 +248,14 @@ class Client {
         return $this->performGet(self::PAGES_ENDPOINT, $filter);
     }
 
+	function entryPages(Filter $filter) {
+        return $this->performGet(self::ENTRY_PAGES_ENDPOINT, $filter);
+    }
+
+	function exitPages(Filter $filter) {
+        return $this->performGet(self::EXIT_PAGES_ENDPOINT, $filter);
+    }
+
     function conversionGoals(Filter $filter) {
         return $this->performGet(self::CONVERSION_GOALS_ENDPOINT, $filter);
     }
@@ -247,6 +298,10 @@ class Client {
 
     function country(Filter $filter) {
         return $this->performGet(self::COUNTRY_ENDPOINT, $filter);
+    }
+
+	function city(Filter $filter) {
+        return $this->performGet(self::CITY_ENDPOINT, $filter);
     }
 
     function platform(Filter $filter) {
