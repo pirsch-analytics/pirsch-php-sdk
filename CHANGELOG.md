@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+* added endpoint for total visitor statistics
+
 ## 1.4.0
 
 * added endpoint to extend sessions

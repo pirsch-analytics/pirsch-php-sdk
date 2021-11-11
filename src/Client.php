@@ -15,6 +15,7 @@ class Client {
     const UTM_CAMPAIGN_ENDPOINT = '/api/v1/statistics/utm/campaign';
     const UTM_CONTENT_ENDPOINT = '/api/v1/statistics/utm/content';
     const UTM_TERM_ENDPOINT = '/api/v1/statistics/utm/term';
+	const TOTAL_VISITORS_ENDPOINT = '/api/v1/statistics/total';
     const VISITORS_ENDPOINT = '/api/v1/statistics/visitor';
     const PAGES_ENDPOINT = '/api/v1/statistics/page';
 	const ENTRY_PAGES_ENDPOINT = '/api/v1/statistics/page/entry';
@@ -238,6 +239,10 @@ class Client {
 
     function utmTerm(Filter $filter) {
         return $this->performGet(self::UTM_TERM_ENDPOINT, $filter);
+    }
+
+	function totalVisitors(Filter $filter) {
+        return $this->performGet(self::TOTAL_VISITORS_ENDPOINT, $filter);
     }
 
     function visitors(Filter $filter) {
