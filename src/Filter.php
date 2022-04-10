@@ -1,10 +1,17 @@
 <?php
 namespace Pirsch;
 
+const SCALE_DAY = 'day';
+const SCALE_WEEK = 'week';
+const SCALE_MONTH = 'month';
+const SCALE_YEAR = 'year';
+
 class Filter {
     public $id;
 	public $from;
 	public $to;
+	public $start;
+	public $scale;
 	public $path;
 	public $pattern;
 	public $entry_path;
@@ -20,6 +27,8 @@ class Filter {
 	public $browser;
 	public $platform;
 	public $screen_class;
+	public $screen_height;
+	public $screen_width;
 	public $utm_source;
 	public $utm_medium;
 	public $utm_campaign;

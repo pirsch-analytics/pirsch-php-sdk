@@ -23,13 +23,16 @@ class Client {
     const CONVERSION_GOALS_ENDPOINT = '/api/v1/statistics/goals';
 	const EVENTS_ENDPOINT = '/api/v1/statistics/events';
 	const EVENT_METADATA_ENDPOINT = '/api/v1/statistics/event/meta';
+	const LIST_EVENTS_ENDPOINT = '/api/v1/statistics/event/list';
     const GROWTH_RATE_ENDPOINT = '/api/v1/statistics/growth';
     const ACTIVE_VISITORS_ENDPOINT = '/api/v1/statistics/active';
     const TIME_OF_DAY_ENDPOINT = '/api/v1/statistics/hours';
     const LANGUAGE_ENDPOINT = '/api/v1/statistics/language';
     const REFERRER_ENDPOINT = '/api/v1/statistics/referrer';
     const OS_ENDPOINT = '/api/v1/statistics/os';
+	const OS_VERSION_ENDPOINT = '/api/v1/statistics/os/version';
     const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
+	const BROWSER_VERSION_ENDPOINT = '/api/v1/statistics/browser/version';
     const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
 	const CITY_ENDPOINT = '/api/v1/statistics/city';
     const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
@@ -273,6 +276,10 @@ class Client {
         return $this->performGet(self::EVENT_METADATA_ENDPOINT, $filter);
     }
 
+	function listEvents(Filter $filter) {
+        return $this->performGet(self::LIST_EVENTS_ENDPOINT, $filter);
+    }
+
     function growth(Filter $filter) {
         return $this->performGet(self::GROWTH_RATE_ENDPOINT, $filter);
     }
@@ -297,8 +304,16 @@ class Client {
         return $this->performGet(self::OS_ENDPOINT, $filter);
     }
 
+	function osVersions(Filter $filter) {
+        return $this->performGet(self::OS_VERSION_ENDPOINT, $filter);
+    }
+
     function browser(Filter $filter) {
         return $this->performGet(self::BROWSER_ENDPOINT, $filter);
+    }
+
+	function browserVersions(Filter $filter) {
+        return $this->performGet(self::BROWSER_VERSION_ENDPOINT, $filter);
     }
 
     function country(Filter $filter) {

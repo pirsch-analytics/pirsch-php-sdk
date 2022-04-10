@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+
+* added listing events, os and browser versions
+* added filter options
+
 ## 1.4.1
 
 * added endpoint for total visitor statistics
