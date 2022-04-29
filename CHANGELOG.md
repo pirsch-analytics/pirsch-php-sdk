@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.2
+
+* fixed empty check for `pageview` method
+* fixed method calls after refreshing token
+
 ## 1.6.1
 
 * added missing `HitOptions` fields
