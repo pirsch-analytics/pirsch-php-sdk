@@ -7,7 +7,7 @@ const SCALE_MONTH = 'month';
 const SCALE_YEAR = 'year';
 
 class Filter {
-    public $id;
+	public $id;
 	public $from;
 	public $to;
 	public $start;

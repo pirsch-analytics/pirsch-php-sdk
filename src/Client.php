@@ -8,42 +8,42 @@ class Client {
 	const EVENT_ENDPOINT = '/api/v1/event';
 	const SESSION_ENDPOINT = '/api/v1/session';
 	const DOMAIN_ENDPOINT = '/api/v1/domain';
-    const SESSION_DURATION_ENDPOINT = '/api/v1/statistics/duration/session';
-    const TIME_ON_PAGE_ENDPOINT = '/api/v1/statistics/duration/page';
-    const UTM_SOURCE_ENDPOINT = '/api/v1/statistics/utm/source';
-    const UTM_MEDIUM_ENDPOINT = '/api/v1/statistics/utm/medium';
-    const UTM_CAMPAIGN_ENDPOINT = '/api/v1/statistics/utm/campaign';
-    const UTM_CONTENT_ENDPOINT = '/api/v1/statistics/utm/content';
-    const UTM_TERM_ENDPOINT = '/api/v1/statistics/utm/term';
+	const SESSION_DURATION_ENDPOINT = '/api/v1/statistics/duration/session';
+	const TIME_ON_PAGE_ENDPOINT = '/api/v1/statistics/duration/page';
+	const UTM_SOURCE_ENDPOINT = '/api/v1/statistics/utm/source';
+	const UTM_MEDIUM_ENDPOINT = '/api/v1/statistics/utm/medium';
+	const UTM_CAMPAIGN_ENDPOINT = '/api/v1/statistics/utm/campaign';
+	const UTM_CONTENT_ENDPOINT = '/api/v1/statistics/utm/content';
+	const UTM_TERM_ENDPOINT = '/api/v1/statistics/utm/term';
 	const TOTAL_VISITORS_ENDPOINT = '/api/v1/statistics/total';
-    const VISITORS_ENDPOINT = '/api/v1/statistics/visitor';
-    const PAGES_ENDPOINT = '/api/v1/statistics/page';
+	const VISITORS_ENDPOINT = '/api/v1/statistics/visitor';
+	const PAGES_ENDPOINT = '/api/v1/statistics/page';
 	const ENTRY_PAGES_ENDPOINT = '/api/v1/statistics/page/entry';
 	const EXIT_PAGES_ENDPOINT = '/api/v1/statistics/page/exit';
-    const CONVERSION_GOALS_ENDPOINT = '/api/v1/statistics/goals';
+	const CONVERSION_GOALS_ENDPOINT = '/api/v1/statistics/goals';
 	const EVENTS_ENDPOINT = '/api/v1/statistics/events';
 	const EVENT_METADATA_ENDPOINT = '/api/v1/statistics/event/meta';
 	const LIST_EVENTS_ENDPOINT = '/api/v1/statistics/event/list';
-    const GROWTH_RATE_ENDPOINT = '/api/v1/statistics/growth';
-    const ACTIVE_VISITORS_ENDPOINT = '/api/v1/statistics/active';
-    const TIME_OF_DAY_ENDPOINT = '/api/v1/statistics/hours';
-    const LANGUAGE_ENDPOINT = '/api/v1/statistics/language';
-    const REFERRER_ENDPOINT = '/api/v1/statistics/referrer';
-    const OS_ENDPOINT = '/api/v1/statistics/os';
+	const GROWTH_RATE_ENDPOINT = '/api/v1/statistics/growth';
+	const ACTIVE_VISITORS_ENDPOINT = '/api/v1/statistics/active';
+	const TIME_OF_DAY_ENDPOINT = '/api/v1/statistics/hours';
+	const LANGUAGE_ENDPOINT = '/api/v1/statistics/language';
+	const REFERRER_ENDPOINT = '/api/v1/statistics/referrer';
+	const OS_ENDPOINT = '/api/v1/statistics/os';
 	const OS_VERSION_ENDPOINT = '/api/v1/statistics/os/version';
-    const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
+	const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
 	const BROWSER_VERSION_ENDPOINT = '/api/v1/statistics/browser/version';
-    const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
+	const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
 	const CITY_ENDPOINT = '/api/v1/statistics/city';
-    const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
-    const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
-    const KEYWORDS_ENDPOINT = '/api/v1/statistics/keywords';
+	const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
+	const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
+	const KEYWORDS_ENDPOINT = '/api/v1/statistics/keywords';
 	const REFERRER_QUERY_PARAMS = array(
 		'ref',
 		'referer',
 		'referrer',
 		'source',
-        'utm_source'
+		'utm_source'
 	);
 
 	private $baseURL;
@@ -59,9 +59,9 @@ class Client {
 	}
 
 	function hit($retry = true) {
-        if($this->getHeader('DNT') === '1') {
-            return;
-        }
+		if($this->getHeader('DNT') === '1') {
+			return;
+		}
 
 		$data = array(
 			'hostname' => $this->hostname,
@@ -99,10 +99,47 @@ class Client {
 		return json_decode($result);
 	}
 
+	function pageview(HitOptions $data, $retry = true) {
+		if($this->getHeader('DNT') === '1') {
+			return;
+		}
+
+		$data->hostname = !$data->hostname ? $this->hostname : $data->hostname;
+		$data->ip = !$data->ip ? $this->getHeader('REMOTE_ADDR') : $data->ip;
+		$data->cf_connecting_ip = !$data->cf_connecting_ip ? $this->getHeader('HTTP_CF_CONNECTING_IP') : $data->cf_connecting_ip;
+		$data->x_forwarded_for = !$data->x_forwarded_for ? $this->getHeader('HTTP_X_FORWARDED_FOR') : $data->x_forwarded_for;
+		$data->forwarded = !$data->forwarded ? $this->getHeader('HTTP_FORWARDED') : $data->forwarded;
+		$data->x_real_ip = !$data->x_real_ip ? $this->getHeader('HTTP_X_REAL_IP') : $data->x_real_ip;
+		$data->user_agent = !$data->user_agent ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
+		$data->accept_language = !$data->accept_language ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+		$options = array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => $this->getRequestHeader(),
+				'content' => json_encode($data)
+			)
+		);
+		$context = stream_context_create($options);
+		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
+		
+		if($result === FALSE) {
+			$responseHeader = $http_response_header[0];
+
+			if($this->isUnauthorized($responseHeader) && $retry) {
+				$this->refreshToken();
+				return $this->hit(false);
+			} else {
+				throw new \Exception('Error sending hit: '.$responseHeader);
+			}
+		}
+
+		return json_decode($result);
+	}
+
 	function event($name, $duration = 0, $meta = NULL, $retry = true) {
-        if($this->getHeader('DNT') === '1') {
-            return;
-        }
+		if($this->getHeader('DNT') === '1') {
+			return;
+		}
 
 		$data = array(
 			'event_name' => $name,
@@ -144,9 +181,9 @@ class Client {
 	}
 
 	function session($retry = true) {
-        if($this->getHeader('DNT') === '1') {
-            return;
-        }
+		if($this->getHeader('DNT') === '1') {
+			return;
+		}
 
 		$data = array(
 			'hostname' => $this->hostname,
@@ -183,11 +220,11 @@ class Client {
 	}
 
 	function domain($retry = true) {
-	    if($this->getAccessToken() === '' && $retry) {
-            $this->refreshToken();
-	    }
+		if($this->getAccessToken() === '' && $retry) {
+			$this->refreshToken();
+		}
 
-	    $options = array(
+		$options = array(
 			'http' => array(
 				'method' => 'GET',
 				'header' => $this->getRequestHeader()
@@ -210,163 +247,163 @@ class Client {
 		$domains = json_decode($result);
 
 		if(count($domains) !== 1) {
-		    throw new \Exception('Error reading domain from result');
+			throw new \Exception('Error reading domain from result');
 		}
 
 		return $domains[0];
 	}
 
 	function sessionDuration(Filter $filter) {
-        return $this->performGet(self::SESSION_DURATION_ENDPOINT, $filter);
+		return $this->performGet(self::SESSION_DURATION_ENDPOINT, $filter);
 	}
 
 	function timeOnPage(Filter $filter) {
-        return $this->performGet(self::TIME_ON_PAGE_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::TIME_ON_PAGE_ENDPOINT, $filter);
+	}
 
-    function utmSource(Filter $filter) {
-        return $this->performGet(self::UTM_SOURCE_ENDPOINT, $filter);
-    }
+	function utmSource(Filter $filter) {
+		return $this->performGet(self::UTM_SOURCE_ENDPOINT, $filter);
+	}
 
-    function utmMedium(Filter $filter) {
-        return $this->performGet(self::UTM_MEDIUM_ENDPOINT, $filter);
-    }
+	function utmMedium(Filter $filter) {
+		return $this->performGet(self::UTM_MEDIUM_ENDPOINT, $filter);
+	}
 
-    function utmCampaign(Filter $filter) {
-        return $this->performGet(self::UTM_CAMPAIGN_ENDPOINT, $filter);
-    }
+	function utmCampaign(Filter $filter) {
+		return $this->performGet(self::UTM_CAMPAIGN_ENDPOINT, $filter);
+	}
 
-    function utmContent(Filter $filter) {
-        return $this->performGet(self::UTM_CONTENT_ENDPOINT, $filter);
-    }
+	function utmContent(Filter $filter) {
+		return $this->performGet(self::UTM_CONTENT_ENDPOINT, $filter);
+	}
 
-    function utmTerm(Filter $filter) {
-        return $this->performGet(self::UTM_TERM_ENDPOINT, $filter);
-    }
+	function utmTerm(Filter $filter) {
+		return $this->performGet(self::UTM_TERM_ENDPOINT, $filter);
+	}
 
 	function totalVisitors(Filter $filter) {
-        return $this->performGet(self::TOTAL_VISITORS_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::TOTAL_VISITORS_ENDPOINT, $filter);
+	}
 
-    function visitors(Filter $filter) {
-        return $this->performGet(self::VISITORS_ENDPOINT, $filter);
-    }
+	function visitors(Filter $filter) {
+		return $this->performGet(self::VISITORS_ENDPOINT, $filter);
+	}
 
-    function pages(Filter $filter) {
-        return $this->performGet(self::PAGES_ENDPOINT, $filter);
-    }
+	function pages(Filter $filter) {
+		return $this->performGet(self::PAGES_ENDPOINT, $filter);
+	}
 
 	function entryPages(Filter $filter) {
-        return $this->performGet(self::ENTRY_PAGES_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::ENTRY_PAGES_ENDPOINT, $filter);
+	}
 
 	function exitPages(Filter $filter) {
-        return $this->performGet(self::EXIT_PAGES_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::EXIT_PAGES_ENDPOINT, $filter);
+	}
 
-    function conversionGoals(Filter $filter) {
-        return $this->performGet(self::CONVERSION_GOALS_ENDPOINT, $filter);
-    }
+	function conversionGoals(Filter $filter) {
+		return $this->performGet(self::CONVERSION_GOALS_ENDPOINT, $filter);
+	}
 
 	function events(Filter $filter) {
-        return $this->performGet(self::EVENTS_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::EVENTS_ENDPOINT, $filter);
+	}
 
 	function eventMetadata(Filter $filter) {
-        return $this->performGet(self::EVENT_METADATA_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::EVENT_METADATA_ENDPOINT, $filter);
+	}
 
 	function listEvents(Filter $filter) {
-        return $this->performGet(self::LIST_EVENTS_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::LIST_EVENTS_ENDPOINT, $filter);
+	}
 
-    function growth(Filter $filter) {
-        return $this->performGet(self::GROWTH_RATE_ENDPOINT, $filter);
-    }
+	function growth(Filter $filter) {
+		return $this->performGet(self::GROWTH_RATE_ENDPOINT, $filter);
+	}
 
-    function activeVisitors(Filter $filter) {
-        return $this->performGet(self::ACTIVE_VISITORS_ENDPOINT, $filter);
-    }
+	function activeVisitors(Filter $filter) {
+		return $this->performGet(self::ACTIVE_VISITORS_ENDPOINT, $filter);
+	}
 
-    function timeOfDay(Filter $filter) {
-        return $this->performGet(self::TIME_OF_DAY_ENDPOINT, $filter);
-    }
+	function timeOfDay(Filter $filter) {
+		return $this->performGet(self::TIME_OF_DAY_ENDPOINT, $filter);
+	}
 
-    function languages(Filter $filter) {
-        return $this->performGet(self::LANGUAGE_ENDPOINT, $filter);
-    }
+	function languages(Filter $filter) {
+		return $this->performGet(self::LANGUAGE_ENDPOINT, $filter);
+	}
 
-    function referrer(Filter $filter) {
-        return $this->performGet(self::REFERRER_ENDPOINT, $filter);
-    }
+	function referrer(Filter $filter) {
+		return $this->performGet(self::REFERRER_ENDPOINT, $filter);
+	}
 
-    function os(Filter $filter) {
-        return $this->performGet(self::OS_ENDPOINT, $filter);
-    }
+	function os(Filter $filter) {
+		return $this->performGet(self::OS_ENDPOINT, $filter);
+	}
 
 	function osVersions(Filter $filter) {
-        return $this->performGet(self::OS_VERSION_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::OS_VERSION_ENDPOINT, $filter);
+	}
 
-    function browser(Filter $filter) {
-        return $this->performGet(self::BROWSER_ENDPOINT, $filter);
-    }
+	function browser(Filter $filter) {
+		return $this->performGet(self::BROWSER_ENDPOINT, $filter);
+	}
 
 	function browserVersions(Filter $filter) {
-        return $this->performGet(self::BROWSER_VERSION_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::BROWSER_VERSION_ENDPOINT, $filter);
+	}
 
-    function country(Filter $filter) {
-        return $this->performGet(self::COUNTRY_ENDPOINT, $filter);
-    }
+	function country(Filter $filter) {
+		return $this->performGet(self::COUNTRY_ENDPOINT, $filter);
+	}
 
 	function city(Filter $filter) {
-        return $this->performGet(self::CITY_ENDPOINT, $filter);
-    }
+		return $this->performGet(self::CITY_ENDPOINT, $filter);
+	}
 
-    function platform(Filter $filter) {
-        return $this->performGet(self::PLATFORM_ENDPOINT, $filter);
-    }
+	function platform(Filter $filter) {
+		return $this->performGet(self::PLATFORM_ENDPOINT, $filter);
+	}
 
-    function screen(Filter $filter) {
-        return $this->performGet(self::SCREEN_ENDPOINT, $filter);
-    }
+	function screen(Filter $filter) {
+		return $this->performGet(self::SCREEN_ENDPOINT, $filter);
+	}
 
-    function keywords(Filter $filter) {
-        return $this->performGet(self::KEYWORDS_ENDPOINT, $filter);
-    }
+	function keywords(Filter $filter) {
+		return $this->performGet(self::KEYWORDS_ENDPOINT, $filter);
+	}
 
-    private function performGet($url, Filter $filter, $retry = true) {
-        if($this->getAccessToken() === '' && $retry) {
-            $this->refreshToken();
-        }
+	private function performGet($url, Filter $filter, $retry = true) {
+		if($this->getAccessToken() === '' && $retry) {
+			$this->refreshToken();
+		}
 
-        $query = http_build_query($filter);
-        $options = array(
-            'http' => array(
-                'method' => 'GET',
-                'header' => $this->getRequestHeader()
-            )
-        );
-        $context = stream_context_create($options);
-        $result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
+		$query = http_build_query($filter);
+		$options = array(
+			'http' => array(
+				'method' => 'GET',
+				'header' => $this->getRequestHeader()
+			)
+		);
+		$context = stream_context_create($options);
+		$result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
 
-        if($result === FALSE) {
-            $responseHeader = $http_response_header[0];
+		if($result === FALSE) {
+			$responseHeader = $http_response_header[0];
 
-            if($this->isUnauthorized($responseHeader) && $retry) {
-                $this->refreshToken();
-                return $this->performGet($url, $filter, false);
-            } else {
-                throw new \Exception('Error getting result for '.$url.': '.$responseHeader);
-            }
-        }
+			if($this->isUnauthorized($responseHeader) && $retry) {
+				$this->refreshToken();
+				return $this->performGet($url, $filter, false);
+			} else {
+				throw new \Exception('Error getting result for '.$url.': '.$responseHeader);
+			}
+		}
 
-        return json_decode($result);
-    }
+		return json_decode($result);
+	}
 
 	private function refreshToken() {
-	    $data = array(
+		$data = array(
 			'grant_type' => 'client_credentials',
 			'client_id' => $this->clientID,
 			'client_secret' => $this->clientSecret
@@ -395,13 +432,13 @@ class Client {
 	}
 
 	private function getAccessToken() {
-	    $token = '';
+		$token = '';
 
-        if(isset($_SESSION['pirsch_access_token'])) {
-            $token = $_SESSION['pirsch_access_token'];
-        }
+		if(isset($_SESSION['pirsch_access_token'])) {
+			$token = $_SESSION['pirsch_access_token'];
+		}
 
-        return $token;
+		return $token;
 	}
 
 	private function isUnauthorized($header) {

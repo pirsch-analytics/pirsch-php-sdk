@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0
+
+* added `pageview` method as an alternative to `hit` that can be used to pass in custom URL and referrer
+
 ## 1.5.0
 
 * added listing events, os and browser versions
