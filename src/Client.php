@@ -155,31 +155,46 @@ class Client {
 		return json_decode($result);
 	}
 
-	function event($name, $duration = 0, $meta = NULL, $retry = true) {
+	function event($name, $duration = 0, $meta = NULL, HitOptions $data = NULL, $retry = true) {
 		if($this->getHeader('DNT') === '1') {
 			return;
 		}
 
-		$data = array(
-			'event_name' => $name,
-			'event_duration' => $duration,
-			'event_meta' => $meta,
-			'hostname' => $this->hostname,
-			'url' => $this->getRequestURL(),
-			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'cf_connecting_ip' => $this->getHeader('HTTP_CF_CONNECTING_IP'),
-			'x_forwarded_for' => $this->getHeader('HTTP_X_FORWARDED_FOR'),
-			'forwarded' => $this->getHeader('HTTP_FORWARDED'),
-			'x_real_ip' => $this->getHeader('HTTP_X_REAL_IP'),
-			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
-			'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
-			'referrer' => $this->getReferrer()
-		);
+		$data->hostname = $this->isEmpty($data->hostname) ? $this->hostname : $data->hostname;
+		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
+		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
+		$data->cf_connecting_ip = $this->isEmpty($data->cf_connecting_ip) ? $this->getHeader('HTTP_CF_CONNECTING_IP') : $data->cf_connecting_ip;
+		$data->x_forwarded_for = $this->isEmpty($data->x_forwarded_for) ? $this->getHeader('HTTP_X_FORWARDED_FOR') : $data->x_forwarded_for;
+		$data->forwarded = $this->isEmpty($data->forwarded) ? $this->getHeader('HTTP_FORWARDED') : $data->forwarded;
+		$data->x_real_ip = $this->isEmpty($data->x_real_ip) ? $this->getHeader('HTTP_X_REAL_IP') : $data->x_real_ip;
+		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
+		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
+		$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
+		$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
+		$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
 		$options = array(
 			'http' => array(
 				'method' => 'POST',
 				'header' => $this->getRequestHeader(),
-				'content' => json_encode($data)
+				'content' => json_encode(array(
+					'event_name' => $name,
+					'event_duration' => $duration,
+					'event_meta' => $meta,
+					'hostname' => $data->hostname,
+					'url' => $data->url,
+					'ip' => $data->ip,
+					'cf_connecting_ip' => $data->cf_connecting_ip,
+					'x_forwarded_for' => $data->x_forwarded_for,
+					'forwarded' => $data->forwarded,
+					'x_real_ip' => $data->x_real_ip,
+					'user_agent' => $data->user_agent,
+					'accept_language' => $data->accept_language,
+					'title' => $data->title,
+					'referrer' => $data->referrer,
+					'screen_width' => intval($data->screen_width),
+					'screen_height' => intval($data->screen_height)
+				))
 			)
 		);
 		$context = stream_context_create($options);
@@ -190,7 +205,7 @@ class Client {
 
 			if($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
-				return $this->event($name, $duration, $meta, false);
+				return $this->event($name, $duration, $meta, $data, false);
 			} else {
 				throw new \Exception('Error sending event: '.$responseHeader);
 			}
