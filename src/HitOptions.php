@@ -11,5 +11,8 @@ class HitOptions {
 	public $x_real_ip;
 	public $user_agent;
 	public $accept_language;
+	public $title;
 	public $referrer;
+	public $screen_width;
+	public $screen_height;
 }
