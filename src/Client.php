@@ -437,6 +437,10 @@ class Client {
 	}
 
 	private function refreshToken() {
+		if(empty($this->clientID)) {
+			throw new \Exception('Single access tokens cannot be refreshed');
+		}
+
 		$data = array(
 			'grant_type' => 'client_credentials',
 			'client_id' => $this->clientID,
@@ -466,13 +470,13 @@ class Client {
 	}
 
 	private function getAccessToken() {
-		$token = '';
-
-		if(isset($_SESSION['pirsch_access_token'])) {
-			$token = $_SESSION['pirsch_access_token'];
+		if(empty($this->clientID)) {
+			return $this->clientSecret;
+		} else if(isset($_SESSION['pirsch_access_token'])) {
+			return $_SESSION['pirsch_access_token'];
 		}
 
-		return $token;
+		return '';
 	}
 
 	private function isUnauthorized($header) {
