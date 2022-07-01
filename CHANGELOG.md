@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0
+
+* removed IP header
+
 ## 1.6.4
 
 * added single access token that don't require to query an access token using oAuth

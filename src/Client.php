@@ -67,10 +67,6 @@ class Client {
 			'hostname' => $this->hostname,
 			'url' => $this->getRequestURL(),
 			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'cf_connecting_ip' => $this->getHeader('HTTP_CF_CONNECTING_IP'),
-			'x_forwarded_for' => $this->getHeader('HTTP_X_FORWARDED_FOR'),
-			'forwarded' => $this->getHeader('HTTP_FORWARDED'),
-			'x_real_ip' => $this->getHeader('HTTP_X_REAL_IP'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
 			'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
 			'referrer' => $this->getReferrer()
@@ -107,10 +103,6 @@ class Client {
 		$data->hostname = $this->isEmpty($data->hostname) ? $this->hostname : $data->hostname;
 		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
-		$data->cf_connecting_ip = $this->isEmpty($data->cf_connecting_ip) ? $this->getHeader('HTTP_CF_CONNECTING_IP') : $data->cf_connecting_ip;
-		$data->x_forwarded_for = $this->isEmpty($data->x_forwarded_for) ? $this->getHeader('HTTP_X_FORWARDED_FOR') : $data->x_forwarded_for;
-		$data->forwarded = $this->isEmpty($data->forwarded) ? $this->getHeader('HTTP_FORWARDED') : $data->forwarded;
-		$data->x_real_ip = $this->isEmpty($data->x_real_ip) ? $this->getHeader('HTTP_X_REAL_IP') : $data->x_real_ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
 		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
 		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
@@ -163,10 +155,6 @@ class Client {
 		$data->hostname = $this->isEmpty($data->hostname) ? $this->hostname : $data->hostname;
 		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
-		$data->cf_connecting_ip = $this->isEmpty($data->cf_connecting_ip) ? $this->getHeader('HTTP_CF_CONNECTING_IP') : $data->cf_connecting_ip;
-		$data->x_forwarded_for = $this->isEmpty($data->x_forwarded_for) ? $this->getHeader('HTTP_X_FORWARDED_FOR') : $data->x_forwarded_for;
-		$data->forwarded = $this->isEmpty($data->forwarded) ? $this->getHeader('HTTP_FORWARDED') : $data->forwarded;
-		$data->x_real_ip = $this->isEmpty($data->x_real_ip) ? $this->getHeader('HTTP_X_REAL_IP') : $data->x_real_ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
 		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
 		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
@@ -223,10 +211,6 @@ class Client {
 			'hostname' => $this->hostname,
 			'url' => $this->getRequestURL(),
 			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'cf_connecting_ip' => $this->getHeader('HTTP_CF_CONNECTING_IP'),
-			'x_forwarded_for' => $this->getHeader('HTTP_X_FORWARDED_FOR'),
-			'forwarded' => $this->getHeader('HTTP_FORWARDED'),
-			'x_real_ip' => $this->getHeader('HTTP_X_REAL_IP'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT')
 		);
 		$options = array(
