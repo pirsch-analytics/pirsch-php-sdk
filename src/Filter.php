@@ -10,6 +10,7 @@ class Filter {
 	public $id;
 	public $from;
 	public $to;
+	public $tz;
 	public $start;
 	public $scale;
 	public $path;
@@ -27,8 +28,6 @@ class Filter {
 	public $browser;
 	public $platform;
 	public $screen_class;
-	public $screen_height;
-	public $screen_width;
 	public $utm_source;
 	public $utm_medium;
 	public $utm_campaign;
@@ -36,4 +35,7 @@ class Filter {
 	public $utm_term;
 	public $limit;
 	public $include_avg_time_on_page;
+	public $sort;
+	public $direction;
+	public $search;
 }

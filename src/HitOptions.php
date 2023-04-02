@@ -2,7 +2,6 @@
 namespace Pirsch;
 
 class HitOptions {
-	public $hostname;
 	public $url;
 	public $ip;
 	public $user_agent;

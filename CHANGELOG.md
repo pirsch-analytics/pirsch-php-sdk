@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.0
+
+* added missing fields to filter
+* added HTTP timeout configuration (default is 5 seconds)
+* removed hostname
+
 ## 1.7.0
 
 * removed IP header

@@ -9,9 +9,9 @@ session_destroy();
 require_once 'src/Client.php';
 require_once 'src/Filter.php';
 
-$clientID = 'CqKGXpCJWsBY6ocSrU6qJlArWwXc5Yl0';
-$clientSecret = 'Sx9X1tY17a5yL4Tdw23Zjc8b9054NBJUjB53A3cBCom6lvn6IHxnZUNJo10ZmDMc';
-$client = new Pirsch\Client($clientID, $clientSecret, 'pirsch.io', 'http://localhost.com:9999');
+$clientID = '';
+$clientSecret = '';
+$client = new Pirsch\Client($clientID, $clientSecret, 5.0, 'http://localhost.com:9999');
 
 try {
 	$client->hit();

@@ -3,6 +3,7 @@ namespace Pirsch;
 
 class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
+
 	const AUTHENTICATION_ENDPOINT = '/api/v1/token';
 	const HIT_ENDPOINT = '/api/v1/hit';
 	const EVENT_ENDPOINT = '/api/v1/event';
@@ -38,6 +39,7 @@ class Client {
 	const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
 	const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
 	const KEYWORDS_ENDPOINT = '/api/v1/statistics/keywords';
+
 	const REFERRER_QUERY_PARAMS = array(
 		'ref',
 		'referer',
@@ -49,13 +51,13 @@ class Client {
 	private $baseURL;
 	private $clientID;
 	private $clientSecret;
-	private $hostname;
+	private $httpTimeout;
 
-	function __construct($clientID, $clientSecret, $hostname, $baseURL = self::DEFAULT_BASE_URL) {
+	function __construct($clientID, $clientSecret, $timeout = 5.0, $baseURL = self::DEFAULT_BASE_URL) {
 		$this->baseURL = $baseURL;
 		$this->clientID = $clientID;
 		$this->clientSecret = $clientSecret;
-		$this->hostname = $hostname;
+		$this->httpTimeout = $timeout;
 	}
 
 	function hit($retry = true) {
@@ -64,7 +66,6 @@ class Client {
 		}
 
 		$data = array(
-			'hostname' => $this->hostname,
 			'url' => $this->getRequestURL(),
 			'ip' => $this->getHeader('REMOTE_ADDR'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
@@ -75,6 +76,7 @@ class Client {
 			'http' => array(
 				'method' => 'POST',
 				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout,
 				'content' => json_encode($data)
 			)
 		);
@@ -100,7 +102,6 @@ class Client {
 			return;
 		}
 
-		$data->hostname = $this->isEmpty($data->hostname) ? $this->hostname : $data->hostname;
 		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
@@ -113,8 +114,8 @@ class Client {
 			'http' => array(
 				'method' => 'POST',
 				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout,
 				'content' => json_encode(array(
-					'hostname' => $data->hostname,
 					'url' => $data->url,
 					'ip' => $data->ip,
 					'cf_connecting_ip' => $data->cf_connecting_ip,
@@ -152,7 +153,6 @@ class Client {
 			return;
 		}
 
-		$data->hostname = $this->isEmpty($data->hostname) ? $this->hostname : $data->hostname;
 		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
@@ -165,11 +165,11 @@ class Client {
 			'http' => array(
 				'method' => 'POST',
 				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout,
 				'content' => json_encode(array(
 					'event_name' => $name,
 					'event_duration' => $duration,
 					'event_meta' => $meta,
-					'hostname' => $data->hostname,
 					'url' => $data->url,
 					'ip' => $data->ip,
 					'cf_connecting_ip' => $data->cf_connecting_ip,
@@ -208,7 +208,6 @@ class Client {
 		}
 
 		$data = array(
-			'hostname' => $this->hostname,
 			'url' => $this->getRequestURL(),
 			'ip' => $this->getHeader('REMOTE_ADDR'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT')
@@ -217,6 +216,7 @@ class Client {
 			'http' => array(
 				'method' => 'POST',
 				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout,
 				'content' => json_encode($data)
 			)
 		);
@@ -245,7 +245,8 @@ class Client {
 		$options = array(
 			'http' => array(
 				'method' => 'GET',
-				'header' => $this->getRequestHeader()
+				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout
 			)
 		);
 		$context = stream_context_create($options);
@@ -400,7 +401,8 @@ class Client {
 		$options = array(
 			'http' => array(
 				'method' => 'GET',
-				'header' => $this->getRequestHeader()
+				'header' => $this->getRequestHeader(),
+				'timeout' => $this->httpTimeout
 			)
 		);
 		$context = stream_context_create($options);
@@ -434,6 +436,7 @@ class Client {
 			'http' => array(
 				'method' => 'POST',
 				'header' => 'Content-Type: application/x-www-form-urlencoded\r\n',
+				'timeout' => $this->httpTimeout,
 				'content' => json_encode($data)
 			)
 		);
