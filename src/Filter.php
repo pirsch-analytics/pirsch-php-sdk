@@ -19,6 +19,7 @@ class Filter {
 	public $exit_path;
 	public $event;
 	public $event_meta_key;
+	// TODO $meta_...
 	public $language;
 	public $country;
 	public $city;
@@ -33,6 +34,7 @@ class Filter {
 	public $utm_campaign;
 	public $utm_content;
 	public $utm_term;
+	public $offset;
 	public $limit;
 	public $include_avg_time_on_page;
 	public $sort;

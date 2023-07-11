@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.1
+
+* added missing fields
+* fixed page view and event request parameters
+* fixed PHP 8.1 warnings
+
 ## 1.8.0
 
 * added missing fields to filter

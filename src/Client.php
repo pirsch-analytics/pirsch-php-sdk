@@ -61,7 +61,7 @@ class Client {
 	}
 
 	function hit($retry = true) {
-		if($this->getHeader('DNT') === '1') {
+		if ($this->getHeader('DNT') === '1') {
 			return;
 		}
 
@@ -83,10 +83,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
 		
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->hit(false);
 			} else {
@@ -98,7 +98,7 @@ class Client {
 	}
 
 	function pageview(HitOptions $data, $retry = true) {
-		if($this->getHeader('DNT') === '1') {
+		if ($this->getHeader('DNT') === '1') {
 			return;
 		}
 
@@ -118,10 +118,6 @@ class Client {
 				'content' => json_encode(array(
 					'url' => $data->url,
 					'ip' => $data->ip,
-					'cf_connecting_ip' => $data->cf_connecting_ip,
-					'x_forwarded_for' => $data->x_forwarded_for,
-					'forwarded' => $data->forwarded,
-					'x_real_ip' => $data->x_real_ip,
 					'user_agent' => $data->user_agent,
 					'accept_language' => $data->accept_language,
 					'title' => $data->title,
@@ -134,10 +130,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
 		
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->pageview($data, false);
 			} else {
@@ -149,7 +145,7 @@ class Client {
 	}
 
 	function event($name, $duration = 0, $meta = NULL, HitOptions $data = NULL, $retry = true) {
-		if($this->getHeader('DNT') === '1') {
+		if ($this->getHeader('DNT') === '1') {
 			return;
 		}
 
@@ -172,10 +168,6 @@ class Client {
 					'event_meta' => $meta,
 					'url' => $data->url,
 					'ip' => $data->ip,
-					'cf_connecting_ip' => $data->cf_connecting_ip,
-					'x_forwarded_for' => $data->x_forwarded_for,
-					'forwarded' => $data->forwarded,
-					'x_real_ip' => $data->x_real_ip,
 					'user_agent' => $data->user_agent,
 					'accept_language' => $data->accept_language,
 					'title' => $data->title,
@@ -188,10 +180,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::EVENT_ENDPOINT, false, $context);
 		
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->event($name, $duration, $meta, $data, false);
 			} else {
@@ -203,12 +195,12 @@ class Client {
 	}
 
 	function session($retry = true) {
-		if($this->getHeader('DNT') === '1') {
+		if ($this->getHeader('DNT') === '1') {
 			return;
 		}
 
 		$data = array(
-			'url' => $this->getRequestURL(),
+			// FIXME
 			'ip' => $this->getHeader('REMOTE_ADDR'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT')
 		);
@@ -223,10 +215,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::SESSION_ENDPOINT, false, $context);
 		
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->hit(false);
 			} else {
@@ -238,7 +230,7 @@ class Client {
 	}
 
 	function domain($retry = true) {
-		if($this->getAccessToken() === '' && $retry) {
+		if ($this->getAccessToken() === '' && $retry) {
 			$this->refreshToken();
 		}
 
@@ -252,10 +244,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::DOMAIN_ENDPOINT, false, $context);
 
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->domain(false);
 			} else {
@@ -265,7 +257,7 @@ class Client {
 
 		$domains = json_decode($result);
 
-		if(count($domains) !== 1) {
+		if (count($domains) !== 1) {
 			throw new \Exception('Error reading domain from result');
 		}
 
@@ -393,7 +385,7 @@ class Client {
 	}
 
 	private function performGet($url, Filter $filter, $retry = true) {
-		if($this->getAccessToken() === '' && $retry) {
+		if ($this->getAccessToken() === '' && $retry) {
 			$this->refreshToken();
 		}
 
@@ -408,10 +400,10 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
 
-		if($result === FALSE) {
+		if ($result === false) {
 			$responseHeader = $http_response_header[0];
 
-			if($this->isUnauthorized($responseHeader) && $retry) {
+			if ($this->isUnauthorized($responseHeader) && $retry) {
 				$this->refreshToken();
 				return $this->performGet($url, $filter, false);
 			} else {
@@ -423,7 +415,7 @@ class Client {
 	}
 
 	private function refreshToken() {
-		if(empty($this->clientID)) {
+		if (empty($this->clientID)) {
 			throw new \Exception('Single access tokens cannot be refreshed');
 		}
 
@@ -443,7 +435,7 @@ class Client {
 		$context = stream_context_create($options);
 		$result = @file_get_contents($this->baseURL.self::AUTHENTICATION_ENDPOINT, false, $context);
 		
-		if($result === FALSE) {
+		if ($result === false) {
 			throw new \Exception('Error refreshing token: '.$http_response_header[0]);
 		}
 
@@ -457,9 +449,9 @@ class Client {
 	}
 
 	private function getAccessToken() {
-		if(empty($this->clientID)) {
+		if (empty($this->clientID)) {
 			return $this->clientSecret;
-		} else if(isset($_SESSION['pirsch_access_token'])) {
+		} else if (isset($_SESSION['pirsch_access_token'])) {
 			return $_SESSION['pirsch_access_token'];
 		}
 
@@ -467,7 +459,11 @@ class Client {
 	}
 
 	private function isUnauthorized($header) {
-		return strpos($header, '401') !== FALSE;
+		if (is_null($header)) {
+			return false;
+		}
+
+		return strpos($header, '401') !== false;
 	}
 
 	private function getRequestURL() {
@@ -477,11 +473,11 @@ class Client {
 	private function getReferrer() {
 		$referrer = $this->getHeader('HTTP_REFERER');
 
-		if(empty($referrer)) {
+		if (empty($referrer)) {
 			foreach(self::REFERRER_QUERY_PARAMS as $key) {
 				$referrer = $this->getQueryParam($key);
 
-				if($referrer != '') {
+				if ($referrer != '') {
 					return $referrer;
 				}
 			}
@@ -491,7 +487,7 @@ class Client {
 	}
 
 	private function getHeader($name) {
-		if(isset($_SERVER[$name])) {
+		if (isset($_SERVER[$name])) {
 			return $_SERVER[$name];
 		}
 
@@ -499,7 +495,7 @@ class Client {
 	}
 
 	private function getQueryParam($name) {
-		if(isset($_GET[$name])) {
+		if (isset($_GET[$name])) {
 			return $_GET[$name];
 		}
 
@@ -507,6 +503,10 @@ class Client {
 	}
 
 	private function isEmpty($str) {
+		if (is_null($str)) {
+			return true;
+		}
+
 		return empty(trim($str, ' \t\n'));
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Pirsch;
 
+// DNT header is not required, as it will be checked before making the request.
 class HitOptions {
 	public $url;
 	public $ip;
