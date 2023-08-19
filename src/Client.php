@@ -70,6 +70,12 @@ class Client {
 			'ip' => $this->getHeader('REMOTE_ADDR'),
 			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
 			'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
+			'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
+			'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
+			'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
+			'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
+			'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
+			'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
 			'referrer' => $this->getReferrer()
 		);
 		$options = array(
@@ -106,6 +112,12 @@ class Client {
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
 		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+		$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
+		$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
+		$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
+		$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
+		$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
+		$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
 		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
 		$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
 		$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
@@ -120,6 +132,12 @@ class Client {
 					'ip' => $data->ip,
 					'user_agent' => $data->user_agent,
 					'accept_language' => $data->accept_language,
+					'sec_ch_ua' => $data->sec_ch_ua,
+					'sec_ch_ua_mobile' => $data->sec_ch_ua_mobile,
+					'sec_ch_ua_platform' => $data->sec_ch_ua_platform,
+					'sec_ch_ua_platform_version' => $data->sec_ch_ua_platform_version,
+					'sec_ch_width' => $data->sec_ch_width,
+					'sec_ch_viewport_width' => $data->sec_ch_viewport_width,
 					'title' => $data->title,
 					'referrer' => $data->referrer,
 					'screen_width' => intval($data->screen_width),
@@ -153,6 +171,12 @@ class Client {
 		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
 		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
 		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+		$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
+		$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
+		$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
+		$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
+		$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
+		$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
 		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
 		$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
 		$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
@@ -170,6 +194,12 @@ class Client {
 					'ip' => $data->ip,
 					'user_agent' => $data->user_agent,
 					'accept_language' => $data->accept_language,
+					'sec_ch_ua' => $data->sec_ch_ua,
+					'sec_ch_ua_mobile' => $data->sec_ch_ua_mobile,
+					'sec_ch_ua_platform' => $data->sec_ch_ua_platform,
+					'sec_ch_ua_platform_version' => $data->sec_ch_ua_platform_version,
+					'sec_ch_width' => $data->sec_ch_width,
+					'sec_ch_viewport_width' => $data->sec_ch_viewport_width,
 					'title' => $data->title,
 					'referrer' => $data->referrer,
 					'screen_width' => intval($data->screen_width),
@@ -200,9 +230,14 @@ class Client {
 		}
 
 		$data = array(
-			// FIXME
 			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'user_agent' => $this->getHeader('HTTP_USER_AGENT')
+			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
+			'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
+			'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
+			'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
+			'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
+			'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
+			'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
 		);
 		$options = array(
 			'http' => array(
