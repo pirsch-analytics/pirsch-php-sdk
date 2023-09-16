@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.0
+
+* added custom_metric_key and custom_metric_type to filter
+
 ## 1.9.0
 
 * added optional client hint headers

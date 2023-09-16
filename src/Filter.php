@@ -6,6 +6,9 @@ const SCALE_WEEK = 'week';
 const SCALE_MONTH = 'month';
 const SCALE_YEAR = 'year';
 
+const CUSTOM_METRIC_TYPE_INTEGER = 'integer';
+const CUSTOM_METRIC_TYPE_FLOAT = 'float';
+
 class Filter {
 	public $id;
 	public $from;
@@ -34,9 +37,11 @@ class Filter {
 	public $utm_campaign;
 	public $utm_content;
 	public $utm_term;
+	public $custom_metric_key;
+	public $custom_metric_type;
+	public $include_avg_time_on_page;
 	public $offset;
 	public $limit;
-	public $include_avg_time_on_page;
 	public $sort;
 	public $direction;
 	public $search;
