@@ -1,6 +1,8 @@
 <?php
 namespace Pirsch;
 
+require 'vendor/autoload.php';
+
 class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
 
@@ -52,86 +54,81 @@ class Client {
 	private $clientID;
 	private $clientSecret;
 	private $httpTimeout;
+	private $client;
 
 	function __construct($clientID, $clientSecret, $timeout = 5.0, $baseURL = self::DEFAULT_BASE_URL) {
 		$this->baseURL = $baseURL;
 		$this->clientID = $clientID;
 		$this->clientSecret = $clientSecret;
 		$this->httpTimeout = $timeout;
+		$this->client = new \GuzzleHttp\Client([
+			'base_uri' => $baseURL,
+			'timeout' => $timeout
+		]);
 	}
 
 	function hit($retry = true) {
-		if ($this->getHeader('DNT') === '1') {
-			return;
-		}
+		try {
+			if ($this->getHeader('DNT') === '1') {
+				return;
+			}
 
-		$data = array(
-			'url' => $this->getRequestURL(),
-			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
-			'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
-			'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
-			'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
-			'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
-			'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
-			'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
-			'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
-			'referrer' => $this->getReferrer()
-		);
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout,
-				'content' => json_encode($data)
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
-		
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
-
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->hit(false);
-				} else {
-					throw new \Exception('Error sending hit: '.$result);
-				}
+			$response = $this->client->post(self::HIT_ENDPOINT, [
+				'headers' => $this->getRequestHeader(),
+				'body' => json_encode(array(
+					'url' => $this->getRequestURL(),
+					'ip' => $this->getHeader('REMOTE_ADDR'),
+					'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
+					'accept_language' => $this->getHeader('HTTP_ACCEPT_LANGUAGE'),
+					'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
+					'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
+					'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
+					'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
+					'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
+					'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
+					'referrer' => $this->getReferrer()
+				))
+			]);
+			return json_decode($response->getBody());
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->hit(false);
 			} else {
-				throw new \Exception('Error sending hit: '.$result);
+				throw new \Exception('Error sending page view: '.$e->getResponse()->getBody());
 			}
 		}
 
-		return json_decode($result);
+		return null;
 	}
 
 	function pageview(HitOptions $data, $retry = true) {
-		if ($this->getHeader('DNT') === '1') {
-			return;
-		}
+		try {
+			if ($this->getHeader('DNT') === '1') {
+				return;
+			}
 
-		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
-		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
-		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
-		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
-		$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
-		$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
-		$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
-		$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
-		$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
-		$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
-		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
-		$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
-		$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
-		$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout,
-				'content' => json_encode(array(
+			if (is_null($data)) {
+				$data = new HitOptions;
+			}
+
+			$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
+			$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
+			$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
+			$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+			$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
+			$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
+			$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
+			$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
+			$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
+			$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
+			$data->title = $this->isEmpty($data->title) ? '' : $data->title;
+			$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
+			$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
+			$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
+			$response = $this->client->post(self::HIT_ENDPOINT, [
+				'headers' => $this->getRequestHeader(),
+				'body' => json_encode(array(
 					'url' => $data->url,
 					'ip' => $data->ip,
 					'user_agent' => $data->user_agent,
@@ -147,54 +144,47 @@ class Client {
 					'screen_width' => intval($data->screen_width),
 					'screen_height' => intval($data->screen_height)
 				))
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
-		
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
-
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->pageview($data, false);
-				} else {
-					throw new \Exception('Error sending page view: '.$result);
-				}
-			} else {
-				throw new \Exception('Error sending page view: '.$result);
+			]);
+			return json_decode($response->getBody());
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->pageview($data, false);
+			} else if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error sending page view: '.$e->getResponse()->getBody());
 			}
 		}
 
-		return json_decode($result);
+		return null;
 	}
 
 	function event($name, $duration = 0, $meta = NULL, HitOptions $data = NULL, $retry = true) {
-		if ($this->getHeader('DNT') === '1') {
-			return;
-		}
+		try {
+			if ($this->getHeader('DNT') === '1') {
+				return;
+			}
 
-		$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
-		$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
-		$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
-		$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
-		$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
-		$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
-		$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
-		$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
-		$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
-		$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
-		$data->title = $this->isEmpty($data->title) ? '' : $data->title;
-		$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
-		$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
-		$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout,
-				'content' => json_encode(array(
+			if (is_null($data)) {
+				$data = new HitOptions;
+			}
+
+			$data->url = $this->isEmpty($data->url) ? $this->getRequestURL() : $data->url;
+			$data->ip = $this->isEmpty($data->ip) ? $this->getHeader('REMOTE_ADDR') : $data->ip;
+			$data->user_agent = $this->isEmpty($data->user_agent) ? $this->getHeader('HTTP_USER_AGENT') : $data->user_agent;
+			$data->accept_language = $this->isEmpty($data->accept_language) ? $this->getHeader('HTTP_ACCEPT_LANGUAGE') : $data->accept_language;
+			$data->sec_ch_ua = $this->isEmpty($data->sec_ch_ua) ? $this->getHeader('HTTP_SEC_CH_UA') : $data->sec_ch_ua;
+			$data->sec_ch_ua_mobile = $this->isEmpty($data->sec_ch_ua_mobile) ? $this->getHeader('HTTP_SEC_CH_UA_MOBILE') : $data->sec_ch_ua_mobile;
+			$data->sec_ch_ua_platform = $this->isEmpty($data->sec_ch_ua_platform) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM') : $data->sec_ch_ua_platform;
+			$data->sec_ch_ua_platform_version = $this->isEmpty($data->sec_ch_ua_platform_version) ? $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION') : $data->sec_ch_ua_platform_version;
+			$data->sec_ch_width = $this->isEmpty($data->sec_ch_width) ? $this->getHeader('HTTP_SEC_CH_WIDTH') : $data->sec_ch_width;
+			$data->sec_ch_viewport_width = $this->isEmpty($data->sec_ch_viewport_width) ? $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH') : $data->sec_ch_viewport_width;
+			$data->title = $this->isEmpty($data->title) ? '' : $data->title;
+			$data->referrer = $this->isEmpty($data->referrer) ? $this->getReferrer() : $data->referrer;
+			$data->screen_width = $this->isEmpty($data->screen_width) ? 0 : $data->screen_width;
+			$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
+			$response = $this->client->post(self::EVENT_ENDPOINT, [
+				'headers' => $this->getRequestHeader(),
+				'body' => json_encode(array(
 					'event_name' => $name,
 					'event_duration' => $duration,
 					'event_meta' => $meta,
@@ -213,110 +203,78 @@ class Client {
 					'screen_width' => intval($data->screen_width),
 					'screen_height' => intval($data->screen_height)
 				))
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::EVENT_ENDPOINT, false, $context);
-		
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
-
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->event($name, $duration, $meta, $data, false);
-				} else {
-					throw new \Exception('Error sending event: '.$result);
-				}
-			} else {
-				throw new \Exception('Error sending event: '.$result);
+			]);
+			return json_decode($response->getBody());
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->event($name, $duration, $meta, $data, false);
+			} else if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error sending event: '.$e->getResponse()->getBody());
 			}
 		}
 
-		return json_decode($result);
+		return null;
 	}
 
 	function session($retry = true) {
-		if ($this->getHeader('DNT') === '1') {
-			return;
-		}
+		try {
+			if ($this->getHeader('DNT') === '1') {
+				return;
+			}
 
-		$data = array(
-			'ip' => $this->getHeader('REMOTE_ADDR'),
-			'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
-			'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
-			'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
-			'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
-			'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
-			'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
-			'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
-		);
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout,
-				'content' => json_encode($data)
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::SESSION_ENDPOINT, false, $context);
-		
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
-
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->session(false);
-				} else {
-					throw new \Exception('Error extending session: '.$result);
-				}
-			} else {
-				throw new \Exception('Error extending session: '.$result);
+			$response = $this->client->post(self::SESSION_ENDPOINT, [
+				'headers' => $this->getRequestHeader(),
+				'body' => json_encode(array(
+					'ip' => $this->getHeader('REMOTE_ADDR'),
+					'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
+					'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
+					'sec_ch_ua_mobile' => $this->getHeader('HTTP_SEC_CH_UA_MOBILE'),
+					'sec_ch_ua_platform' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM'),
+					'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
+					'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
+					'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
+				))
+			]);
+			return json_decode($response->getBody());
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->session(false);
+			} else if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error extending session: '.$e->getResponse()->getBody());
 			}
 		}
 
-		return json_decode($result);
+		return null;
 	}
 
 	function domain($retry = true) {
-		if ($this->getAccessToken() === '' && $retry) {
-			$this->refreshToken();
-		}
+		try {
+			if ($this->getAccessToken() === '' && $retry) {
+				$this->refreshToken();
+			}
 
-		$options = array(
-			'http' => array(
-				'method' => 'GET',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::DOMAIN_ENDPOINT, false, $context);
+			$response = $this->client->get(self::DOMAIN_ENDPOINT, [
+				'headers' => $this->getRequestHeader()
+			]);
+			$domains = json_decode($response->getBody());
 
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
+			if (count($domains) !== 1) {
+				throw new \Exception('Error reading domain from result');
+			}
 
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->domain(false);
-				} else {
-					throw new \Exception('Error getting domain: '.$result);
-				}
-			} else {
-				throw new \Exception('Error getting domain: '.$result);
+			return $domains[0];
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->domain(false);
+			} else if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error getting domain: '.$e->getResponse()->getBody());
 			}
 		}
 
-		$domains = json_decode($result);
-
-		if (count($domains) !== 1) {
-			throw new \Exception('Error reading domain from result');
-		}
-
-		return $domains[0];
+		return null;
 	}
 
 	function sessionDuration(Filter $filter) {
@@ -440,71 +398,61 @@ class Client {
 	}
 
 	private function performGet($url, Filter $filter, $retry = true) {
-		if ($this->getAccessToken() === '' && $retry) {
-			$this->refreshToken();
-		}
+		try {
+			if ($this->getAccessToken() === '' && $retry) {
+				$this->refreshToken();
+			}
 
-		$query = http_build_query($filter);
-		$options = array(
-			'http' => array(
-				'method' => 'GET',
-				'header' => $this->getRequestHeader(),
-				'timeout' => $this->httpTimeout
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
-
-		if ($result === false) {
-			if (isset($http_response_header) && count($http_response_header) > 0) {
-				$responseHeader = $http_response_header[0];
-
-				if ($this->isUnauthorized($responseHeader) && $retry) {
-					$this->refreshToken();
-					return $this->performGet($url, $filter, false);
-				} else {
-					throw new \Exception('Error getting result for '.$url.': '.$result);
-				}
-			} else {
-				throw new \Exception('Error getting result for '.$url.': '.$result);
+			$query = http_build_query($filter);
+			$response = $this->client->get($url.'?'.$query, [
+				'headers' => $this->getRequestHeader()
+			]);
+			return json_decode($response->getBody());
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() == 401 && $retry) {
+				$this->refreshToken();
+				return $this->performGet($url, $filter, false);
+			} else if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error getting result for '.$url.': '.$e->getResponse()->getBody());
 			}
 		}
-
-		return json_decode($result);
 	}
 
 	private function refreshToken() {
-		if (empty($this->clientID)) {
-			throw new \Exception('Single access tokens cannot be refreshed');
-		}
+		try {
+			if (empty($this->clientID)) {
+				throw new \Exception('Single access tokens cannot be refreshed');
+			}
 
-		$data = array(
-			'grant_type' => 'client_credentials',
-			'client_id' => $this->clientID,
-			'client_secret' => $this->clientSecret
-		);
-		$options = array(
-			'http' => array(
-				'method' => 'POST',
-				'header' => 'Content-Type: application/x-www-form-urlencoded\r\n',
-				'timeout' => $this->httpTimeout,
-				'content' => json_encode($data)
-			)
-		);
-		$context = stream_context_create($options);
-		$result = @file_get_contents($this->baseURL.self::AUTHENTICATION_ENDPOINT, false, $context);
-		
-		if ($result === false) {
-			throw new \Exception('Error refreshing token: '.$http_response_header[0]);
-		}
+			$response = $this->client->post(self::AUTHENTICATION_ENDPOINT, [
+				'headers' => [
+					'Content-Type' => 'application/x-www-form-urlencoded'
+				],
+				'body' => json_encode(array(
+					'grant_type' => 'client_credentials',
+					'client_id' => $this->clientID,
+					'client_secret' => $this->clientSecret
+				))
+			]);
 
-		$resp = json_decode($result);
-		$_SESSION['pirsch_access_token'] = $resp->access_token;
+			if ($response->getStatusCode() != 200) {
+				throw new \Exception('Error refreshing token '.$response->getStatusCode().': '.$response->getBody());
+			}
+
+			$resp = json_decode($response->getBody());
+			$_SESSION['pirsch_access_token'] = $resp->access_token;
+		} catch(\GuzzleHttp\Exception\RequestException $e) {
+			if ($e->getResponse()->getStatusCode() != 200) {
+				throw new \Exception('Error refreshing token '.$e->getResponse()->getStatusCode().': '.$e->getResponse()->getBody());
+			}
+		}
 	}
 
 	private function getRequestHeader() {
-		return 'Authorization: Bearer '.$this->getAccessToken()."\r\n". // These have to be double quotation marks!
-			'Content-Type: application/json\r\n';
+		return [
+			'Authorization' => 'Bearer '.$this->getAccessToken(),
+			'Content-Type' => 'application/json'
+		];
 	}
 
 	private function getAccessToken() {

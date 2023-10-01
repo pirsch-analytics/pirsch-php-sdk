@@ -11,7 +11,7 @@ require_once 'src/Filter.php';
 
 $clientID = '';
 $clientSecret = '';
-$client = new Pirsch\Client($clientID, $clientSecret, 5.0, 'http://localhost.com:9999');
+$client = new Pirsch\Client($clientID, $clientSecret, 5.0, 'https://localhost.com:9999');
 
 try {
 	$client->hit();

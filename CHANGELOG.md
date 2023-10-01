@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.3
+
+* added Guzzle for HTTP requests
+* added vendor directory
+
 ## 1.10.2
 
 * improved error handling
