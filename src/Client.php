@@ -90,13 +90,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if (isset($http_response_header) && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->hit(false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->hit(false);
+				} else {
+					throw new \Exception('Error sending hit: '.$result);
+				}
 			} else {
-				throw new \Exception('Error sending hit: '.$responseHeader);
+				throw new \Exception('Error sending hit: '.$result);
 			}
 		}
 
@@ -149,7 +153,7 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			if ($http_response_header && count($http_response_header) > 0) {
+			if (isset($http_response_header) && count($http_response_header) > 0) {
 				$responseHeader = $http_response_header[0];
 
 				if ($this->isUnauthorized($responseHeader) && $retry) {
@@ -215,7 +219,7 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::EVENT_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			if ($http_response_header && count($http_response_header) > 0) {
+			if (isset($http_response_header) && count($http_response_header) > 0) {
 				$responseHeader = $http_response_header[0];
 
 				if ($this->isUnauthorized($responseHeader) && $retry) {
@@ -259,7 +263,7 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::SESSION_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			if ($http_response_header && count($http_response_header) > 0) {
+			if (isset($http_response_header) && count($http_response_header) > 0) {
 				$responseHeader = $http_response_header[0];
 
 				if ($this->isUnauthorized($responseHeader) && $retry) {
@@ -292,13 +296,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::DOMAIN_ENDPOINT, false, $context);
 
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if (isset($http_response_header) && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->domain(false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->domain(false);
+				} else {
+					throw new \Exception('Error getting domain: '.$result);
+				}
 			} else {
-				throw new \Exception('Error getting domain: '.$responseHeader);
+				throw new \Exception('Error getting domain: '.$result);
 			}
 		}
 
@@ -448,13 +456,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.$url.'?'.$query, false, $context);
 
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if (isset($http_response_header) && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->performGet($url, $filter, false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->performGet($url, $filter, false);
+				} else {
+					throw new \Exception('Error getting result for '.$url.': '.$result);
+				}
 			} else {
-				throw new \Exception('Error getting result for '.$url.': '.$responseHeader);
+				throw new \Exception('Error getting result for '.$url.': '.$result);
 			}
 		}
 

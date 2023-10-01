@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.2
+
+* improved error handling
+
 ## 1.10.1
 
 * fixed extending sessions
