@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.6
+
+* fixed Guzzle JSON parameters
+
 ## 1.10.5
 
 * fixed import path

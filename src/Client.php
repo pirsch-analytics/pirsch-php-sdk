@@ -75,7 +75,7 @@ class Client {
 
 			$response = $this->client->post(self::HIT_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
-				'body' => json_encode(array(
+				'json' => [
 					'url' => $this->getRequestURL(),
 					'ip' => $this->getHeader('REMOTE_ADDR'),
 					'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
@@ -87,7 +87,7 @@ class Client {
 					'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
 					'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
 					'referrer' => $this->getReferrer()
-				))
+				]
 			]);
 			return json_decode($response->getBody());
 		} catch(\GuzzleHttp\Exception\RequestException $e) {
@@ -128,7 +128,7 @@ class Client {
 			$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
 			$response = $this->client->post(self::HIT_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
-				'body' => json_encode(array(
+				'json' => [
 					'url' => $data->url,
 					'ip' => $data->ip,
 					'user_agent' => $data->user_agent,
@@ -143,7 +143,7 @@ class Client {
 					'referrer' => $data->referrer,
 					'screen_width' => intval($data->screen_width),
 					'screen_height' => intval($data->screen_height)
-				))
+				]
 			]);
 			return json_decode($response->getBody());
 		} catch(\GuzzleHttp\Exception\RequestException $e) {
@@ -184,7 +184,7 @@ class Client {
 			$data->screen_height = $this->isEmpty($data->screen_height) ? 0 : $data->screen_height;
 			$response = $this->client->post(self::EVENT_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
-				'body' => json_encode(array(
+				'json' => [
 					'event_name' => $name,
 					'event_duration' => $duration,
 					'event_meta' => $meta,
@@ -202,7 +202,7 @@ class Client {
 					'referrer' => $data->referrer,
 					'screen_width' => intval($data->screen_width),
 					'screen_height' => intval($data->screen_height)
-				))
+				]
 			]);
 			return json_decode($response->getBody());
 		} catch(\GuzzleHttp\Exception\RequestException $e) {
@@ -225,7 +225,7 @@ class Client {
 
 			$response = $this->client->post(self::SESSION_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
-				'body' => json_encode(array(
+				'json' => [
 					'ip' => $this->getHeader('REMOTE_ADDR'),
 					'user_agent' => $this->getHeader('HTTP_USER_AGENT'),
 					'sec_ch_ua' => $this->getHeader('HTTP_SEC_CH_UA'),
@@ -234,7 +234,7 @@ class Client {
 					'sec_ch_ua_platform_version' => $this->getHeader('HTTP_SEC_CH_UA_PLATFORM_VERSION'),
 					'sec_ch_width' => $this->getHeader('HTTP_SEC_CH_WIDTH'),
 					'sec_ch_viewport_width' => $this->getHeader('HTTP_SEC_CH_VIEWPORT_WIDTH'),
-				))
+				]
 			]);
 			return json_decode($response->getBody());
 		} catch(\GuzzleHttp\Exception\RequestException $e) {
@@ -428,11 +428,11 @@ class Client {
 				'headers' => [
 					'Content-Type' => 'application/x-www-form-urlencoded'
 				],
-				'body' => json_encode(array(
+				'json' => [
 					'grant_type' => 'client_credentials',
 					'client_id' => $this->clientID,
 					'client_secret' => $this->clientSecret
-				))
+				]
 			]);
 
 			if ($response->getStatusCode() != 200) {
