@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.4
+
+* fixed import path
+
 ## 1.10.3
 
 * added Guzzle for HTTP requests
