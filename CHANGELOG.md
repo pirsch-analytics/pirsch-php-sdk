@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.1
+
+* fixed extending sessions
+* improved error handling
+
 ## 1.10.0
 
 * added custom_metric_key and custom_metric_type to filter

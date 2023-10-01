@@ -149,13 +149,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::HIT_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if ($http_response_header && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->pageview($data, false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->pageview($data, false);
+				} else {
+					throw new \Exception('Error sending page view: '.$result);
+				}
 			} else {
-				throw new \Exception('Error sending page view: '.$responseHeader);
+				throw new \Exception('Error sending page view: '.$result);
 			}
 		}
 
@@ -211,13 +215,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::EVENT_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if ($http_response_header && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->event($name, $duration, $meta, $data, false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->event($name, $duration, $meta, $data, false);
+				} else {
+					throw new \Exception('Error sending event: '.$result);
+				}
 			} else {
-				throw new \Exception('Error sending event: '.$responseHeader);
+				throw new \Exception('Error sending event: '.$result);
 			}
 		}
 
@@ -251,13 +259,17 @@ class Client {
 		$result = @file_get_contents($this->baseURL.self::SESSION_ENDPOINT, false, $context);
 		
 		if ($result === false) {
-			$responseHeader = $http_response_header[0];
+			if ($http_response_header && count($http_response_header) > 0) {
+				$responseHeader = $http_response_header[0];
 
-			if ($this->isUnauthorized($responseHeader) && $retry) {
-				$this->refreshToken();
-				return $this->hit(false);
+				if ($this->isUnauthorized($responseHeader) && $retry) {
+					$this->refreshToken();
+					return $this->session(false);
+				} else {
+					throw new \Exception('Error extending session: '.$result);
+				}
 			} else {
-				throw new \Exception('Error sending hit: '.$responseHeader);
+				throw new \Exception('Error extending session: '.$result);
 			}
 		}
 
