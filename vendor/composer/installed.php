@@ -3,7 +3,7 @@
         'name' => 'pirsch-analytics/sdk',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '188f0983298819d251b00471fc31d28efe332995',
+        'reference' => 'ccc7b504d4bed90895f99d8fcbcf7ab536c39713',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -40,7 +40,7 @@
         'pirsch-analytics/sdk' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '188f0983298819d251b00471fc31d28efe332995',
+            'reference' => 'ccc7b504d4bed90895f99d8fcbcf7ab536c39713',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
