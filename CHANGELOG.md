@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.5
+
+* fixed import path
+
 ## 1.10.4
 
 * fixed import path

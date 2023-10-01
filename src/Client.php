@@ -1,7 +1,7 @@
 <?php
 namespace Pirsch;
 
-require __DIR__.'/vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 class Client {
 	const DEFAULT_BASE_URL = 'https://api.pirsch.io';
