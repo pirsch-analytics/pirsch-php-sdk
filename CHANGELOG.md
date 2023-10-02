@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.10.7
+
+* fixed timeout
+* don't store base URL and timeout in Client class
+
 ## 1.10.6
 
 * fixed Guzzle JSON parameters

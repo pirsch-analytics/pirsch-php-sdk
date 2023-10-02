@@ -50,20 +50,16 @@ class Client {
 		'utm_source'
 	);
 
-	private $baseURL;
 	private $clientID;
 	private $clientSecret;
-	private $httpTimeout;
 	private $client;
 
 	function __construct($clientID, $clientSecret, $timeout = 5.0, $baseURL = self::DEFAULT_BASE_URL) {
-		$this->baseURL = $baseURL;
 		$this->clientID = $clientID;
 		$this->clientSecret = $clientSecret;
-		$this->httpTimeout = $timeout;
 		$this->client = new \GuzzleHttp\Client([
 			'base_uri' => $baseURL,
-			'timeout' => $timeout
+			'timeout' => floatval($timeout)
 		]);
 	}
 
