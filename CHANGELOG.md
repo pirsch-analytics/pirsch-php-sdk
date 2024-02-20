@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.0
+
+* added tags to page views
+* added reading tag statistics
+* updated dependencies
+
 ## 1.10.7
 
 * fixed timeout

@@ -17,4 +17,5 @@ class HitOptions {
 	public $referrer;
 	public $screen_width;
 	public $screen_height;
+	public $tags;
 }

@@ -37,6 +37,7 @@ class Filter {
 	public $utm_campaign;
 	public $utm_content;
 	public $utm_term;
+	// TODO $tag_...
 	public $custom_metric_key;
 	public $custom_metric_type;
 	public $include_avg_time_on_page;
