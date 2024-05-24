@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.0
+
+* removed DNT
+* updated dependencies
+
 ## 1.11.0
 
 * added tags to page views

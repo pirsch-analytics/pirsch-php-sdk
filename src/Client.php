@@ -67,10 +67,6 @@ class Client {
 
 	function hit($retry = true) {
 		try {
-			if ($this->getHeader('DNT') === '1') {
-				return;
-			}
-
 			$response = $this->client->post(self::HIT_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
 				'json' => [
@@ -102,10 +98,6 @@ class Client {
 
 	function pageview(HitOptions $data, $retry = true) {
 		try {
-			if ($this->getHeader('DNT') === '1') {
-				return;
-			}
-
 			if (is_null($data)) {
 				$data = new HitOptions;
 			}
@@ -159,10 +151,6 @@ class Client {
 
 	function event($name, $duration = 0, $meta = NULL, HitOptions $data = NULL, $retry = true) {
 		try {
-			if ($this->getHeader('DNT') === '1') {
-				return;
-			}
-
 			if (is_null($data)) {
 				$data = new HitOptions;
 			}
@@ -219,10 +207,6 @@ class Client {
 
 	function session($retry = true) {
 		try {
-			if ($this->getHeader('DNT') === '1') {
-				return;
-			}
-
 			$response = $this->client->post(self::SESSION_ENDPOINT, [
 				'headers' => $this->getRequestHeader(),
 				'json' => [
