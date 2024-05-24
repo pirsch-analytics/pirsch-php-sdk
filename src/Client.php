@@ -37,6 +37,7 @@ class Client {
 	const BROWSER_ENDPOINT = '/api/v1/statistics/browser';
 	const BROWSER_VERSION_ENDPOINT = '/api/v1/statistics/browser/version';
 	const COUNTRY_ENDPOINT = '/api/v1/statistics/country';
+	const REGION_ENDPOINT = '/api/v1/statistics/region';
 	const CITY_ENDPOINT = '/api/v1/statistics/city';
 	const PLATFORM_ENDPOINT = '/api/v1/statistics/platform';
 	const SCREEN_ENDPOINT = '/api/v1/statistics/screen';
@@ -363,6 +364,10 @@ class Client {
 
 	function country(Filter $filter) {
 		return $this->performGet(self::COUNTRY_ENDPOINT, $filter);
+	}
+
+	function region(Filter $filter) {
+		return $this->performGet(self::REGION_ENDPOINT, $filter);
 	}
 
 	function city(Filter $filter) {

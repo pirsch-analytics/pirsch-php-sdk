@@ -25,6 +25,7 @@ class Filter {
 	// TODO $meta_...
 	public $language;
 	public $country;
+	public $region;
 	public $city;
 	public $referrer;
 	public $referrer_name;

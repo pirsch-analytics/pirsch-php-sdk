@@ -2,6 +2,7 @@
 
 ## 1.12.0
 
+* added regional statistics
 * removed DNT
 * updated dependencies
 
