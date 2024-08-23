@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+* added funnel endpoints
+* added options to extending sessions
+* updated dependencies
+
 ## 1.12.0
 
 * added regional statistics

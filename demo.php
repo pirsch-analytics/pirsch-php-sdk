@@ -9,22 +9,28 @@ session_destroy();
 require_once 'src/Client.php';
 require_once 'src/Filter.php';
 
-$clientID = '';
-$clientSecret = '';
-$client = new Pirsch\Client($clientID, $clientSecret, 5.0, 'https://localhost.com:9999');
+// Configuration
+$clientID = '9EisID5H4jTpSwrxHiTrHEstmn2isNH0';
+$clientSecret = 'Vw2guiFFahW7KemRCFIYxkJF9mzULgx8Q6HMQrEDhRclQstphklHPgBfo4BL0lix';
+$baseURL = Pirsch\Client::DEFAULT_BASE_URL; // https://localhost.com:9999
+$sendData = false;
 
-try {
-	$client->hit();
-	print '<p>Hit sent!</p>';
-} catch(Exception $e) {
-	print '<p>An error occurred while sending the hit: </p>'.$e->getMessage();
-}
+$client = new Pirsch\Client($clientID, $clientSecret, Pirsch\Client::DEFAULT_TIMEOUT, $baseURL);
 
-try {
-	$client->event('PHP', 42, ['hello' => 'world']);
-	print '<p>Event sent!</p>';
-} catch(Exception $e) {
-	print '<p>An error occurred while sending the event: </p>'.$e->getMessage();
+if ($sendData) {
+    try {
+        $client->hit();
+        print '<p>Hit sent!</p>';
+    } catch(Exception $e) {
+        print '<p>An error occurred while sending the hit: </p>'.$e->getMessage();
+    }
+
+    try {
+        $client->event('PHP', 42, ['hello' => 'world']);
+        print '<p>Event sent!</p>';
+    } catch(Exception $e) {
+        print '<p>An error occurred while sending the event: </p>'.$e->getMessage();
+    }
 }
 
 try {
@@ -148,6 +154,17 @@ try {
     $keywords = $client->keywords($filter);
     var_dump($keywords);
     echo '<br /><br />';
+
+    $funnel = $client->listFunnel($filter);
+    var_dump($funnel);
+    echo '<br /><br />';
+
+    foreach ($funnel as $f) {
+        $filter->funnel_id = $f->id;
+        $data = $client->funnel($filter);
+        var_dump($data);
+        echo '<br /><br />';
+    }
 } catch(Exception $e) {
     print '<p>An error occurred while reading the statistics: </p>'.$e->getMessage();
 }
