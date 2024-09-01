@@ -56,6 +56,8 @@ class Client {
 		'utm_source'
 	);
 
+	const SESSION_TOKEN_KEY = 'pirsch_access_token';
+
 	private $clientID;
 	private $clientSecret;
 	private $client;
@@ -440,6 +442,8 @@ class Client {
 
 	private function refreshToken() {
 		try {
+			unset($_SESSION[self::SESSION_TOKEN_KEY]);
+
 			if (empty($this->clientID)) {
 				throw new \Exception('Single access tokens cannot be refreshed');
 			}
@@ -460,7 +464,7 @@ class Client {
 			}
 
 			$resp = json_decode($response->getBody());
-			$_SESSION['pirsch_access_token'] = $resp->access_token;
+			$_SESSION[self::SESSION_TOKEN_KEY] = $resp->access_token;
 		} catch(\GuzzleHttp\Exception\RequestException $e) {
 			if (!is_null($e->getResponse()) && $e->getResponse()->getStatusCode() != 200) {
 				throw new \Exception('Error refreshing token '.!is_null($e->getResponse()) && $e->getResponse()->getStatusCode().': '.$e->getResponse()->getBody());
@@ -478,8 +482,8 @@ class Client {
 	private function getAccessToken() {
 		if (empty($this->clientID)) {
 			return $this->clientSecret;
-		} else if (isset($_SESSION['pirsch_access_token'])) {
-			return $_SESSION['pirsch_access_token'];
+		} else if (isset($_SESSION[self::SESSION_TOKEN_KEY])) {
+			return $_SESSION[self::SESSION_TOKEN_KEY];
 		}
 
 		return '';
