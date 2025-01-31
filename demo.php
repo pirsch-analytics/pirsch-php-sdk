@@ -10,19 +10,22 @@ require_once 'src/Client.php';
 require_once 'src/Filter.php';
 
 // Configuration
-$clientID = '9EisID5H4jTpSwrxHiTrHEstmn2isNH0';
-$clientSecret = 'Vw2guiFFahW7KemRCFIYxkJF9mzULgx8Q6HMQrEDhRclQstphklHPgBfo4BL0lix';
+$clientID = '';
+$clientSecret = '';
 $baseURL = Pirsch\Client::DEFAULT_BASE_URL; // https://localhost.com:9999
-$sendData = false;
+//$baseURL = 'https://localhost.com:9999';
+$sendData = true;
 
+// Create client
 $client = new Pirsch\Client($clientID, $clientSecret, Pirsch\Client::DEFAULT_TIMEOUT, $baseURL);
 
+// Send page view and event
 if ($sendData) {
     try {
         $client->hit();
-        print '<p>Hit sent!</p>';
+        print '<p>Page view sent!</p>';
     } catch(Exception $e) {
-        print '<p>An error occurred while sending the hit: </p>'.$e->getMessage();
+        print '<p>An error occurred while sending the page view: </p>'.$e->getMessage();
     }
 
     try {
