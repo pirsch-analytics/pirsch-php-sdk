@@ -4,16 +4,13 @@ ini_set('display_startup_errors', 1);
 ini_set('default_socket_timeout', 2);
 error_reporting(E_ALL);
 session_start();
-session_destroy();
 
-require_once 'src/Client.php';
-require_once 'src/Filter.php';
+require __DIR__.'/vendor/autoload.php';
 
 // Configuration
-$clientID = '';
-$clientSecret = '';
-$baseURL = Pirsch\Client::DEFAULT_BASE_URL; // https://localhost.com:9999
-//$baseURL = 'https://localhost.com:9999';
+$clientID = getenv('PIRSCH_CLIENT_ID') ?: '';
+$clientSecret = getenv('PIRSCH_CLIENT_SECRET') ?: '';
+$baseURL = getenv('PIRSCH_BASE_URL') ?: Pirsch\Client::DEFAULT_BASE_URL;
 $sendData = true;
 
 // Create client
@@ -22,7 +19,7 @@ $client = new Pirsch\Client($clientID, $clientSecret, Pirsch\Client::DEFAULT_TIM
 // Send page view and event
 if ($sendData) {
     try {
-        $client->hit();
+        $client->pageview();
         print '<p>Page view sent!</p>';
     } catch(Exception $e) {
         print '<p>An error occurred while sending the page view: </p>'.$e->getMessage();
@@ -101,14 +98,14 @@ try {
     $events = $client->events($filter);
     var_dump($events);
     echo '<br /><br />';
-    
+
     echo '<h2>Event Metadata</h2>';
     $filter->event_meta_key = 'hello';
     $metadata = $client->eventMetadata($filter);
     var_dump($metadata);
     echo '<br /><br />';
-    $filter->event = '';
-    $filter->event_meta_key = '';
+    $filter->event = null;
+    $filter->event_meta_key = null;
 
     $growth = $client->growth($filter);
     var_dump($growth);

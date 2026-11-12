@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.0.0
+
+* added strict types, typed properties, and return types
+* added `PirschException` (thrown for all errors, includes the HTTP status code)
+* added `meta` and `tags` filters to `Filter`
+* added `Filter::SCALE_*` and `Filter::CUSTOM_METRIC_TYPE_*` constants
+* added optional Guzzle client to the `Client` constructor
+* `hit()` is deprecated, use `pageview()` instead
+* `pageview()`, `event()`, and `session()` no longer return a value
+* `pageview()` and `session()` can be called without arguments
+* the access token is cached on the client and only stored in `$_SESSION` if a session is active
+* fixed `session()` retry passing a boolean instead of the options
+* fixed errors being silently ignored on network failures
+* fixed broken error message when refreshing the token fails
+* fixed `HTTPS=off` being detected as HTTPS
+* fixed `HitOptions` passed by the caller being modified
+* removed `require` of the autoloader from `Client.php`
+* removed hardcoded credentials from the demo
+
 ## 2.0.2
 
 * updated dependencies
